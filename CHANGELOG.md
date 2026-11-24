@@ -11,6 +11,8 @@
   the face and red hair.
 - Added a self-contained bilingual Web packer with downloadable streams,
   tables and matching decoder sources.
+- Added a self-contained bilingual image converter for TMS9918A Graphics II,
+  C64, Game Boy and NES raw assets, ready for the AMYZ Web Packer.
 - Added a measured machine-by-machine comparison and emulator contact sheet.
 
 ## 1.0.0 - 2026-11-23

@@ -1,0 +1,1401 @@
+<!doctype html>
+<!--
+  Amy Image Converter
+  Copyright (c) 2026, Amy Bienvenu
+  SPDX-License-Identifier: BSD-3-Clause
+-->
+<html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Amy Image Converter</title><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<style>
+:root {
+  --bg: #f7f7f5; --surface: #ffffff; --surface-2: #efefec; --text: #1c1c1e; --muted: #55575c;
+  --border: #c9c9c4; --accent: #5b2bb5; --accent-text: #ffffff; --accent-soft: #ece4fb;
+  --ok: #1d6b35; --err: #a8231b; --focus: #1a5fd0; --code-bg: #f1f0ec;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141416; --surface: #1d1d21; --surface-2: #26262b; --text: #ececef; --muted: #a9abb3;
+    --border: #3d3e45; --accent: #b79bf2; --accent-text: #160a2e; --accent-soft: #2c2340;
+    --ok: #7fd49a; --err: #ff9c94; --focus: #8ab4ff; --code-bg: #17171a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141416; --surface: #1d1d21; --surface-2: #26262b; --text: #ececef; --muted: #a9abb3;
+  --border: #3d3e45; --accent: #b79bf2; --accent-text: #160a2e; --accent-soft: #2c2340;
+  --ok: #7fd49a; --err: #ff9c94; --focus: #8ab4ff; --code-bg: #17171a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 1rem/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 60rem; margin: 0 auto; padding: 1rem 16px 3rem; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+h1 { font-size: 1.6rem; margin: 0; letter-spacing: -.01em; }
+h1 small { display: block; font-size: .95rem; font-weight: 400; color: var(--muted); }
+h2 { font-size: 1.15rem; margin: 0 0 .75rem; }
+.tools { display: flex; gap: .5rem; flex-wrap: wrap; }
+section.card { background: var(--surface); border: 1px solid var(--border); border-radius: .6rem; padding: 1rem; margin-bottom: 1rem; }
+.step { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  background: var(--accent); color: var(--accent-text); font-weight: 700; font-size: .9rem; margin-right: .5rem; }
+button, .btn {
+  font: inherit; font-weight: 600; min-height: 2.75rem; padding: .5rem 1rem; border-radius: .45rem; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: .4rem;
+}
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+fieldset { border: 0; padding: 0; margin: 0 0 1rem; min-width: 0; }
+legend { font-weight: 600; margin-bottom: .4rem; padding: 0; }
+.targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .5rem; }
+.targets label {
+  display: flex; flex-direction: column; gap: .15rem; border: 1px solid var(--border); border-radius: .45rem; padding: .6rem .7rem; cursor: pointer; background: var(--surface);
+}
+.targets label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.targets input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.targets label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.targets .t-name { font-weight: 700; }
+.targets .t-cpu { font-size: .85rem; color: var(--muted); }
+.drop {
+  border: 2px dashed var(--border); border-radius: .6rem; padding: 1.25rem 1rem; text-align: center; background: var(--surface-2);
+}
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop p { margin: .25rem 0 .75rem; }
+.files { list-style: none; padding: 0; margin: .75rem 0 0; display: grid; gap: .5rem; }
+.files li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; border: 1px solid var(--border); border-radius: .45rem; padding: .5rem .7rem; }
+.files .fname { font-weight: 600; overflow-wrap: anywhere; flex: 1 1 12rem; }
+.files .fsize { color: var(--muted); font-size: .9rem; }
+.row { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; }
+.opt { display: flex; align-items: center; gap: .5rem; min-height: 2.75rem; }
+.opt input[type=checkbox], .opt input[type=radio] { width: 1.25rem; height: 1.25rem; accent-color: var(--accent); }
+input[type=text], select {
+  font: inherit; min-height: 2.75rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: .4rem; background: var(--surface); color: var(--text); max-width: 100%;
+}
+input.addr { width: 7.5rem; font-family: ui-monospace, Menlo, Consolas, monospace; }
+input[type=range] { width: min(18rem, 100%); accent-color: var(--accent); }
+.hint { color: var(--muted); font-size: .92rem; margin: .25rem 0 0; }
+.progress { margin-top: 1rem; }
+progress { width: 100%; height: 1rem; accent-color: var(--accent); }
+.status { margin: .4rem 0 0; min-height: 1.5em; }
+.error { color: var(--err); font-weight: 600; }
+.okc { color: var(--ok); font-weight: 600; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 600; background: var(--surface-2); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.outputs { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .5rem; }
+.outputs li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; justify-content: space-between; border: 1px solid var(--border); border-radius: .45rem; padding: .4rem .7rem; }
+.outputs code { overflow-wrap: anywhere; }
+pre.src {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: .45rem; padding: .75rem; max-height: 24rem; overflow: auto;
+  font: .85rem/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre; tab-size: 8;
+}
+details summary { cursor: pointer; font-weight: 600; min-height: 2.75rem; display: flex; align-items: center; }
+.log { font: .85rem/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--muted); }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+footer { color: var(--muted); font-size: .9rem; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<style>
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.view { border: 1px solid var(--border); border-radius: .45rem; background: var(--surface-2); padding: .5rem; min-width: 0; }
+.view h3 { margin: 0 0 .4rem; font-size: 1rem; }
+.scroller { overflow: auto; max-height: 34rem; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; touch-action: none; }
+#prevCanvas.drawing { cursor: crosshair; outline: 2px dashed var(--accent); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .25rem 1.5rem; }
+.field { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .6rem; }
+.field label { font-weight: 600; }
+.stat { font-size: 1.05rem; }
+.stat strong { font-variant-numeric: tabular-nums; }
+.addr-tag { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+</style>
+<div class="wrap">
+<header>
+  <h1><span data-i18n="title"></span> <small data-i18n="subtitle"></small></h1>
+  <div class="tools">
+    <button type="button" id="langBtn">English</button>
+    <button type="button" id="themeBtn"></button>
+  </div>
+</header>
+<main>
+<section class="card" aria-labelledby="h-img">
+  <h2 id="h-img"><span class="step" aria-hidden="true">1</span><span data-i18n="image"></span></h2>
+  <div class="drop" id="drop">
+    <p data-i18n="dropText"></p>
+    <label class="btn" for="fileInput"><span data-i18n="choose"></span></label>
+    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/gif" class="sr-only">
+  </div>
+  <p class="hint" id="imgInfo" role="status" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="h-target">
+  <h2 id="h-target"><span class="step" aria-hidden="true">2</span><span data-i18n="machine"></span></h2>
+  <fieldset><legend class="sr-only" data-i18n="machine"></legend><div class="targets" id="targets"></div></fieldset>
+</section>
+
+<section class="card" aria-labelledby="h-opts">
+  <h2 id="h-opts"><span class="step" aria-hidden="true">3</span><span data-i18n="options"></span></h2>
+  <div class="grid2">
+    <div class="field"><label for="fit" data-i18n="fit"></label>
+      <select id="fit"><option value="fit" data-i18n="fitFit"></option><option value="fill" data-i18n="fitFill"></option><option value="none" data-i18n="fitNone"></option></select></div>
+    <div class="field"><label for="palette" data-i18n="palette"></label><select id="palette"></select></div>
+    <div class="field" id="cropXBox"><label for="cropX" data-i18n="cropX"></label><input type="range" id="cropX" min="0" max="100" value="50"></div>
+    <div class="field" id="cropYBox"><label for="cropY" data-i18n="cropY"></label><input type="range" id="cropY" min="0" max="100" value="50"></div>
+    <div class="field"><label for="dither" data-i18n="dither"></label>
+      <select id="dither"><option value="none" data-i18n="dNone"></option><option value="ordered" data-i18n="dOrdered"></option><option value="fs">Floyd-Steinberg</option></select></div>
+    <div class="field"><label for="strength"><span data-i18n="strength"></span> <output id="strengthOut">100</output> %</label><input type="range" id="strength" min="0" max="100" value="100"></div>
+    <div class="field"><label for="brightness"><span data-i18n="brightness"></span> <output id="brightnessOut">0</output></label><input type="range" id="brightness" min="-100" max="100" value="0"></div>
+    <div class="field"><label for="contrast"><span data-i18n="contrast"></span> <output id="contrastOut">0</output></label><input type="range" id="contrast" min="-100" max="100" value="0"></div>
+  </div>
+  <div id="optTms"><label class="opt"><input type="checkbox" id="normalize" checked> <span data-i18n="normalize"></span></label><label class="opt"><input type="checkbox" id="dedup"> <span data-i18n="dedup"></span></label><p class="hint" data-i18n="dedupHint"></p><label class="opt"><input type="checkbox" id="pletter"> <span data-i18n="pletter"></span></label><p class="hint" data-i18n="pletterHint"></p></div>
+  <div id="optGb">
+    <div class="field"><label for="levels" data-i18n="levels"></label>
+      <select id="levels"><option value="auto" data-i18n="levelsAuto"></option><option value="manual" data-i18n="levelsManual"></option></select></div>
+    <div class="grid2" id="thBox">
+      <div class="field"><label for="th0"><span data-i18n="th0"></span> <output id="th0Out">64</output></label><input type="range" id="th0" min="0" max="255" value="64"></div>
+      <div class="field"><label for="th1"><span data-i18n="th1"></span> <output id="th1Out">128</output></label><input type="range" id="th1" min="0" max="255" value="128"></div>
+      <div class="field"><label for="th2"><span data-i18n="th2"></span> <output id="th2Out">192</output></label><input type="range" id="th2" min="0" max="255" value="192"></div>
+    </div>
+  </div>
+  <div id="optNes">
+    <div class="row">
+      <button type="button" id="protectBtn" aria-pressed="false" data-i18n="protectDraw"></button>
+      <button type="button" id="protectClear" data-i18n="protectClear"></button>
+      <span id="protectInfo" class="addr-tag"></span>
+    </div>
+    <p class="hint" data-i18n="protectHint"></p>
+    <label class="opt"><input type="checkbox" id="sprites" checked> <span data-i18n="sprites"></span></label>
+    <div class="field"><label for="nesMap" data-i18n="nesMap"></label>
+      <select id="nesMap"><option value="auto" data-i18n="nesMapAuto"></option><option value="nearest" data-i18n="nesMapNearest"></option></select></div>
+  </div>
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="h-prev">
+  <h2 id="h-prev"><span class="step" aria-hidden="true">4</span><span data-i18n="preview"></span></h2>
+  <div class="row">
+    <div class="field"><label for="zoom" data-i18n="zoom"></label>
+      <select id="zoom"><option value="1">1x</option><option value="2" selected>2x</option><option value="3">3x</option><option value="4">4x</option><option value="6">6x</option></select></div>
+    <p class="stat" id="stat" aria-live="polite"></p>
+  </div>
+  <div class="cmp">
+    <div class="view"><h3 data-i18n="orig"></h3><div class="scroller"><canvas id="origCanvas" aria-labelledby="h-prev"></canvas></div></div>
+    <div class="view"><h3 data-i18n="machinePrev"></h3><div class="scroller"><canvas id="prevCanvas" aria-labelledby="h-prev"></canvas></div></div>
+  </div>
+  <p class="hint" id="infoLine"></p>
+</section>
+
+<section class="card" aria-labelledby="h-out">
+  <h2 id="h-out"><span class="step" aria-hidden="true">5</span><span data-i18n="outputs"></span></h2>
+  <ul class="outputs" id="outputs"></ul>
+  <p class="hint" id="outHint"></p>
+  <div id="cvbBox" class="hidden">
+    <h3 data-i18n="cvbTitle"></h3>
+    <p class="hint" id="cvbHint"></p>
+    <div class="row"><button type="button" id="cvbCopy" data-i18n="copy"></button><span id="cvbStatus" role="status" aria-live="polite"></span></div>
+    <pre class="src" id="cvbSrc" tabindex="0" aria-labelledby="cvbBox"></pre>
+  </div>
+</section>
+</main>
+<footer><p data-i18n="footer"></p></footer>
+</div>
+<script>
+'use strict';
+// conv.js - image conversion core of the Amy image converter (no DOM, no network).
+// Input: an RGB image { w, h, rgb: Uint8Array (w*h*3) }. Output: raw machine files.
+// Machines: TMS9918A mode 2, C64 hires and multicolour, Game Boy 2bpp, NES.
+// The Game Boy and NES paths follow ports/gb/gb_convert.py and ports/nes/nes_convert2.py
+// step by step (same arithmetic, same tie-breaking), so a TMS9918A-palette source gives
+// byte-identical files.
+'use strict';
+const CONV = (() => {
+
+// ---------------------------------------------------------------- palettes
+const hexPal = (s) => s.split(' ').map((h) => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]);
+const PALETTES = {
+  tms: { mame: { name: 'TMS9918A (MAME / blueMSX)', rgb: hexPal('000000 000000 21C842 5EDC78 5455ED 7D76FC D4524D 42EBF5 FC5554 FF7978 D4C154 E6CE80 21B03B C95BBA CCCCCC FFFFFF') } },
+  c64: {
+    pepto: { name: 'C64 Pepto (PAL)', rgb: hexPal('000000 FFFFFF 68372B 70A4B2 6F3D86 588D43 352879 B8C76F 6F4F25 433900 9A6759 444444 6C6C6C 9AD284 6C5EB5 959595') },
+    colodore: { name: 'C64 Colodore', rgb: hexPal('000000 FFFFFF 813338 75CEC8 8E3C97 56AC4D 2E2C9B EDF171 8E5029 553800 C46C71 4A4A4A 7B7B7B A9FF9F 706DEB B2B2B2') },
+  },
+  gb: {
+    grey: { name: 'Game Boy, grey', rgb: hexPal('FFFFFF AAAAAA 555555 000000') },
+    dmg: { name: 'Game Boy, DMG green', rgb: hexPal('E0F8D0 88C070 346856 081820') },
+  },
+  nes: { ntsc: { name: 'NES 2C02 (FCEUX-style)', rgb: hexPal('7C7C7C 0000FC 0000BC 4428BC 940084 A80020 A81000 881400 503000 007800 006800 005800 004058 000000 000000 000000 BCBCBC 0078F8 0058F8 6844FC D800CC E40058 F83800 E45C10 AC7C00 00B800 00A800 00A844 008888 000000 000000 000000 F8F8F8 3CBCFC 6888FC 9878F8 F878F8 F85898 F87858 FCA044 F8B800 B8F818 58D854 58F898 00E8D8 787878 000000 000000 FCFCFC A4E4FC B8B8F8 D8B8F8 F8B8F8 F8A4C0 F0D0B0 FCE0A8 F8D878 D8F878 B8F8B8 B8F8D8 00FCFC F8D8F8 000000 000000') } },
+};
+// NES colours that are usable (no duplicates of black, no $0D)
+const NES_USABLE = [];
+for (let i = 0; i < 64; i++) { const lo = i & 15; if (lo >= 0x0D && i !== 0x0F) continue; if (i === 0x0D) continue; NES_USABLE.push(i); }
+// the TMS9918A -> NES colour table of nes_convert2.py (used when the source is in the TMS palette)
+const TMS2NES = { 0: 0x0F, 1: 0x0F, 2: 0x1A, 3: 0x2A, 4: 0x12, 5: 0x22, 6: 0x06, 7: 0x2C, 8: 0x16, 9: 0x26, 10: 0x28, 11: 0x38, 12: 0x0A, 13: 0x14, 14: 0x10, 15: 0x30 };
+
+// ---------------------------------------------------------------- geometry
+// box-filter resample of one float plane (same loops as gb_convert.py)
+function resamplePlane(src, W, H, PW, PH) {
+  const sx = W / PW, sy = H / PH, out = new Float64Array(PW * PH);
+  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) {
+    const x0 = x * sx, x1 = (x + 1) * sx, y0 = y * sy, y1 = (y + 1) * sy;
+    let acc = 0, wsum = 0;
+    for (let yy = Math.trunc(y0); yy < Math.min(H, Math.trunc(y1 + 0.999)); yy++) {
+      const wy = Math.min(y1, yy + 1) - Math.max(y0, yy);
+      for (let xx = Math.trunc(x0); xx < Math.min(W, Math.trunc(x1 + 0.999)); xx++) {
+        const wx = Math.min(x1, xx + 1) - Math.max(x0, xx), w = wx * wy;
+        if (w > 0) { acc += w * src[yy * W + xx]; wsum += w; }
+      }
+    }
+    out[y * PW + x] = acc / wsum;
+  }
+  return out;
+}
+// place the source on a SW x SH screen: 'fit' keeps the whole picture (letterbox), 'fill' crops.
+// Returns the source window, the destination rectangle (snapped to the grid) and the scale.
+function layout(img, SW, SH, opt, snapX, snapY, pixAspect = 1) {
+  const fit = opt.fit || 'fit';
+  const sw = img.w * pixAspect;                       // source width in screen pixels
+  let s = fit === 'fill' ? Math.max(SW / sw, SH / img.h) : Math.min(SW / sw, SH / img.h);
+  if (fit === 'none') s = 1;
+  let dw = Math.min(SW, Math.round(sw * s)), dh = Math.min(SH, Math.round(img.h * s));
+  // source window (crop)
+  const cw = Math.min(img.w, Math.round(dw / s / pixAspect)), ch = Math.min(img.h, Math.round(dh / s));
+  const ox = Math.round((img.w - cw) * (opt.cropX ?? 0.5)), oy = Math.round((img.h - ch) * (opt.cropY ?? 0.5));
+  const dx = Math.floor((SW - dw) / 2 / snapX) * snapX, dy = Math.floor((SH - dh) / 2 / snapY) * snapY;
+  return { ox, oy, cw, ch, dx, dy, dw, dh };
+}
+function cropPlane(plane, W, L) {
+  if (L.ox === 0 && L.oy === 0 && L.cw === W) return plane.subarray ? plane.subarray(0, L.cw * L.ch) : plane;
+  const o = new Float64Array(L.cw * L.ch);
+  for (let y = 0; y < L.ch; y++) for (let x = 0; x < L.cw; x++) o[y * L.cw + x] = plane[(y + L.oy) * W + x + L.ox];
+  return o;
+}
+// brightness / contrast on a float value (0..255); identity at 0, 0
+function adjust(v, b, c) {
+  if (!b && !c) return v;
+  const k = (100 + c) / 100;
+  v = (v - 128) * k * k + 128 + b * 1.28;
+  return v < 0 ? 0 : v > 255 ? 255 : v;
+}
+// RGB planes resampled into the destination rectangle of a SW x SH screen (border = black)
+function screenRGB(img, SW, SH, opt, snapX, snapY, pixAspect = 1) {
+  const L = layout(img, SW, SH, opt, snapX, snapY, pixAspect);
+  const planes = [0, 1, 2].map((ch) => {
+    const p = new Float64Array(img.w * img.h);
+    for (let i = 0; i < p.length; i++) p[i] = adjust(img.rgb[i * 3 + ch], opt.brightness || 0, opt.contrast || 0);
+    const c = cropPlane(p, img.w, L);
+    return (L.cw === L.dw && L.ch === L.dh) ? Float64Array.from(c) : resamplePlane(c, L.cw, L.ch, L.dw, L.dh);
+  });
+  const out = new Float64Array(SW * SH * 3), inside = new Uint8Array(SW * SH);
+  for (let y = 0; y < L.dh; y++) for (let x = 0; x < L.dw; x++) {
+    const d = (y + L.dy) * SW + x + L.dx, s = y * L.dw + x;
+    out[d * 3] = planes[0][s]; out[d * 3 + 1] = planes[1][s]; out[d * 3 + 2] = planes[2][s]; inside[d] = 1;
+  }
+  return { rgb: out, inside, L };
+}
+
+// ---------------------------------------------------------------- quantising
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const d2 = (r, g, b, p) => (r - p[0]) ** 2 + (g - p[1]) ** 2 + (b - p[2]) ** 2;
+function nearest(r, g, b, pal, allowed) {
+  let bi = allowed[0], bd = Infinity;
+  for (const i of allowed) { const d = d2(r, g, b, pal[i]); if (d < bd) { bd = d; bi = i; } }
+  return bi;
+}
+// quantise an RGB float screen to palette indices (allowed = index list), with dithering
+function quantise(scr, SW, SH, pal, allowed, opt) {
+  const q = new Int16Array(SW * SH), rgb = Float64Array.from(scr.rgb), mode = opt.dither || 'none', s = (opt.strength ?? 100) / 100;
+  const exact = new Map(); allowed.forEach((i) => { const k = pal[i].join(','); if (!exact.has(k)) exact.set(k, i); });
+  for (let y = 0; y < SH; y++) for (let x = 0; x < SW; x++) {
+    const i = y * SW + x;
+    let r = rgb[i * 3], g = rgb[i * 3 + 1], b = rgb[i * 3 + 2];
+    if (mode === 'ordered') { const t = (BAYER[(y & 3) * 4 + (x & 3)] / 16 - 0.5) * 64 * s; r += t; g += t; b += t; }
+    const k = exact.get(Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b));
+    const c = (k !== undefined && r === Math.round(r) && g === Math.round(g) && b === Math.round(b)) ? k : nearest(r, g, b, pal, allowed);
+    q[i] = c;
+    if (mode === 'fs') {
+      const er = (r - pal[c][0]) * s, eg = (g - pal[c][1]) * s, eb = (b - pal[c][2]) * s;
+      const add = (xx, yy, f) => { if (xx < 0 || xx >= SW || yy >= SH) return; const j = (yy * SW + xx) * 3; rgb[j] += er * f; rgb[j + 1] += eg * f; rgb[j + 2] += eb * f; };
+      add(x + 1, y, 7 / 16); add(x - 1, y + 1, 3 / 16); add(x, y + 1, 5 / 16); add(x + 1, y + 1, 1 / 16);
+    }
+  }
+  return q;
+}
+// best set of n colours for a cell: most pixels kept, then lowest total error, then lowest indices
+function bestColours(cellIdx, cellRGB, n, pal, fixed = []) {
+  const count = new Map();
+  for (const c of cellIdx) count.set(c, (count.get(c) || 0) + 1);
+  const cand = [...count.keys()].filter((c) => !fixed.includes(c)).sort((a, b) => count.get(b) - count.get(a) || a - b);
+  const pick = cand.slice(0, n);
+  return pick;
+}
+
+// ---------------------------------------------------------------- TMS9918A mode 2
+function tms(img, opt) {
+  const pal = PALETTES.tms[opt.palette || 'mame'].rgb, allowed = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  const scr = screenRGB(img, 256, 192, opt, 8, 8);
+  const q = quantise(scr, 256, 192, pal, allowed, opt);
+  const out = new Int16Array(q.length); let changed = 0;
+  const pat = new Uint8Array(6144), col = new Uint8Array(6144);
+  for (let ty = 0; ty < 24; ty++) for (let tx = 0; tx < 32; tx++) for (let r = 0; r < 8; r++) {
+    const y = ty * 8 + r, base = y * 256 + tx * 8, row = Array.from(q.subarray(base, base + 8));
+    const pick = bestColours(row, null, 2, pal);
+    let bg = pick[0], fg = pick.length > 1 ? pick[1] : pick[0];
+    let P = 0;
+    for (let b = 0; b < 8; b++) {
+      let c = row[b];
+      if (c !== bg && c !== fg) { const i = (y * 256 + tx * 8 + b) * 3; c = nearest(scr.rgb[i], scr.rgb[i + 1], scr.rgb[i + 2], pal, fg === bg ? [bg] : [bg, fg]); changed++; }
+      out[base + b] = c; if (c === fg && fg !== bg) P |= 0x80 >> b;
+    }
+    const k = (ty * 32 + tx) * 8 + r;
+    pat[k] = P; col[k] = fg === bg ? bg * 17 : fg << 4 | bg;
+  }
+  // equivalent-pair rewrite (toolkit tools/normalize.py, variant 0): each row becomes the
+  // display-identical (pattern, colour) pair that best repeats the row above, so it packs better
+  if (opt.normalize !== false) for (let i = 0; i < 6144; i++) {
+    const p = pat[i], c = col[i], f = c >> 4, b = c & 15; let cands;
+    if (f === b || p === 0 || p === 0xff) {
+      const x = p === 0 ? b : f; cands = [];
+      for (let q = 0; q < 256; q++) cands.push([q, x * 17]);
+      for (let m = 0; m < 16; m++) cands.push([0, m << 4 | x]);
+      for (let m = 0; m < 16; m++) cands.push([0xff, x << 4 | m]);
+    } else cands = [[p, c], [p ^ 0xff, b << 4 | f]];
+    let best = null, bs = -1;
+    for (const pc of cands) {
+      let sc = 0;
+      if (i >= 1) sc += 4 * (pc[0] === pat[i - 1]) + 4 * (pc[1] === col[i - 1]);
+      sc += 0.5 * (pc[0] === p && pc[1] === c);
+      if (sc > bs) { bs = sc; best = pc; }
+    }
+    pat[i] = best[0]; col[i] = best[1];
+  }
+  // name table: sequential, or deduplicated per third (pattern + colour of the 8x8 cell)
+  const name = new Uint8Array(768); let uniq = [0, 0, 0];
+  let P2 = pat, C2 = col;
+  if (opt.dedup) {
+    P2 = new Uint8Array(6144); C2 = new Uint8Array(6144);
+    for (let third = 0; third < 3; third++) {
+      const seen = new Map();
+      for (let c = 0; c < 256; c++) {
+        const cell = third * 256 + c, key = Array.from(pat.subarray(cell * 8, cell * 8 + 8)).concat(Array.from(col.subarray(cell * 8, cell * 8 + 8))).join(',');
+        let idx = seen.get(key);
+        if (idx === undefined) { idx = seen.size; seen.set(key, idx); P2.set(pat.subarray(cell * 8, cell * 8 + 8), (third * 256 + idx) * 8); C2.set(col.subarray(cell * 8, cell * 8 + 8), (third * 256 + idx) * 8); }
+        name[cell] = idx;
+      }
+      uniq[third] = seen.size;
+    }
+  } else for (let i = 0; i < 768; i++) name[i] = i & 255;
+  return {
+    preview: { w: 256, h: 192, idx: out, pal }, changed, total: 256 * 192,
+    files: [{ name: 'pattern.bin', bytes: P2, note: 'VRAM $0000' }, { name: 'color.bin', bytes: C2, note: 'VRAM $2000' }, { name: 'name.bin', bytes: name, note: 'VRAM $1800' }],
+    info: opt.dedup ? { uniq } : {},
+  };
+}
+
+// ---------------------------------------------------------------- C64
+function c64(img, opt, multi) {
+  const pal = PALETTES.c64[opt.palette || 'pepto'].rgb, all = [...Array(16).keys()];
+  const SW = multi ? 160 : 320, cw = multi ? 4 : 8;
+  const scr = screenRGB(img, SW, 200, opt, cw, 8, multi ? 0.5 : 1);
+  const q = quantise(scr, SW, 200, pal, all, opt);
+  const out = new Int16Array(q.length); let changed = 0;
+  const bitmap = new Uint8Array(8000), screen = new Uint8Array(1000), cram = new Uint8Array(1000);
+  let bgc = 0;
+  if (multi) {   // background: the most frequent colour of the picture (ties: lowest index)
+    const n = new Array(16).fill(0); for (const c of q) n[c]++;
+    bgc = n.indexOf(Math.max(...n));
+  }
+  for (let cy = 0; cy < 25; cy++) for (let cx = 0; cx < 40; cx++) {
+    const cell = [];
+    for (let r = 0; r < 8; r++) for (let x = 0; x < cw; x++) cell.push(q[(cy * 8 + r) * SW + cx * cw + x]);
+    let cols;
+    if (multi) { cols = [bgc, ...bestColours(cell, null, 3, pal, [bgc])]; while (cols.length < 4) cols.push(cols[cols.length - 1]); }
+    else { const p = bestColours(cell, null, 2, pal); cols = [p[0], p.length > 1 ? p[1] : p[0]]; }
+    const uniqCols = [...new Set(cols)];
+    for (let r = 0; r < 8; r++) {
+      let byte = 0;
+      for (let x = 0; x < cw; x++) {
+        const y = cy * 8 + r, X = cx * cw + x, i = y * SW + X;
+        let c = q[i];
+        if (!uniqCols.includes(c)) { c = nearest(scr.rgb[i * 3], scr.rgb[i * 3 + 1], scr.rgb[i * 3 + 2], pal, uniqCols); changed++; }
+        out[i] = c;
+        const v = cols.indexOf(c);
+        if (multi) byte |= v << (6 - 2 * x); else byte |= (v === 1 ? 1 : 0) << (7 - x);
+      }
+      bitmap[(cy * 40 + cx) * 8 + r] = byte;
+    }
+    if (multi) { screen[cy * 40 + cx] = cols[1] << 4 | cols[2]; cram[cy * 40 + cx] = cols[3]; }
+    else screen[cy * 40 + cx] = cols[1] << 4 | cols[0];
+  }
+  const files = [{ name: 'bitmap.bin', bytes: bitmap, addr: 0x2000 }, { name: 'screen.bin', bytes: screen, addr: 0x0400 }];
+  if (multi) files.push({ name: 'colorram.bin', bytes: cram, addr: 0x4000, note: 'copy to $D800' }, { name: 'background.bin', bytes: Uint8Array.of(bgc), addr: 0x4400, note: '$D021' });
+  return { preview: { w: SW, h: 200, idx: out, pal, aspect: multi ? 2 : 1 }, changed, total: SW * 200, files, info: multi ? { background: bgc } : {} };
+}
+
+// ---------------------------------------------------------------- Game Boy (as gb_convert.py)
+// compensated float sum, as CPython 3.12+ sum() does it (so the k-means centres match exactly)
+function fsum(a) {
+  let s = 0, c = 0;
+  for (const x of a) { const t = s + x; if (Math.abs(s) >= Math.abs(x)) c += (s - t) + x; else c += (x - t) + s; s = t; }
+  return c && Number.isFinite(c) ? s + c : s;
+}
+function gb(img, opt) {
+  // luminance of every source pixel, then the box filter (gb_convert.py order)
+  const L = layout(img, 160, 144, opt, 8, 8);
+  const lum = new Float64Array(img.w * img.h);
+  for (let i = 0; i < lum.length; i++) {
+    const R = adjust(img.rgb[i * 3], opt.brightness || 0, opt.contrast || 0), G = adjust(img.rgb[i * 3 + 1], opt.brightness || 0, opt.contrast || 0), B = adjust(img.rgb[i * 3 + 2], opt.brightness || 0, opt.contrast || 0);
+    lum[i] = 0.299 * R + 0.587 * G + 0.114 * B;
+  }
+  const c = cropPlane(lum, img.w, L);
+  const small = (L.cw === L.dw && L.ch === L.dh) ? Float64Array.from(c) : resamplePlane(c, L.cw, L.ch, L.dw, L.dh);
+  // 4 grey levels: 1-D k-means (gb_convert.py) or manual thresholds
+  let cent;
+  if (opt.levels === 'manual') cent = null;
+  else {
+    const vals = Array.from(small).sort((a, b) => a - b);
+    cent = [0.1, 0.4, 0.7, 0.95].map((q) => vals[Math.trunc(vals.length * q)]);
+    for (let it = 0; it < 50; it++) {
+      const groups = [[], [], [], []];
+      for (const v of vals) { let bi = 0; for (let i = 1; i < 4; i++) if (Math.abs(v - cent[i]) < Math.abs(v - cent[bi])) bi = i; groups[bi].push(v); }
+      cent = groups.map((g, i) => (g.length ? fsum(g) / g.length : cent[i]));
+      cent.sort((a, b) => a - b);
+    }
+  }
+  const th = opt.thresholds || [64, 128, 192];
+  const shadeOf = (v) => {
+    if (cent) { let bi = 0; for (let i = 1; i < 4; i++) if (Math.abs(v - cent[i]) < Math.abs(v - cent[bi])) bi = i; return 3 - bi; }
+    return v >= th[2] ? 0 : v >= th[1] ? 1 : v >= th[0] ? 2 : 3;
+  };
+  const levelsV = cent || [th[0] / 2, (th[0] + th[1]) / 2, (th[1] + th[2]) / 2, (th[2] + 255) / 2];
+  // dithering on the luminance, towards the 4 level values
+  const PW = L.dw, PH = L.dh, plane = Float64Array.from(small), s = (opt.strength ?? 100) / 100;
+  const qv = new Int16Array(PW * PH);
+  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) {
+    let v = plane[y * PW + x];
+    if (opt.dither === 'ordered') v += (BAYER[(y & 3) * 4 + (x & 3)] / 16 - 0.5) * 64 * s;
+    const sh = shadeOf(v); qv[y * PW + x] = sh;
+    if (opt.dither === 'fs') {
+      const e = (v - levelsV[3 - sh]) * s;
+      const add = (xx, yy, f) => { if (xx < 0 || xx >= PW || yy >= PH) return; plane[yy * PW + xx] += e * f; };
+      add(x + 1, y, 7 / 16); add(x - 1, y + 1, 3 / 16); add(x, y + 1, 5 / 16); add(x + 1, y + 1, 1 / 16);
+    }
+  }
+  // screen (border = shade 3), tiles, merge
+  const scrn = new Int16Array(160 * 144).fill(3);
+  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) scrn[(y + L.dy) * 160 + x + L.dx] = qv[y * PW + x];
+  const tileBytes = (ty, tx) => {
+    const b = new Uint8Array(16);
+    for (let r = 0; r < 8; r++) { let lo = 0, hi = 0; for (let c2 = 0; c2 < 8; c2++) { const v = scrn[(ty * 8 + r) * 160 + tx * 8 + c2]; lo |= (v & 1) << (7 - c2); hi |= (v >> 1) << (7 - c2); } b[2 * r] = lo; b[2 * r + 1] = hi; }
+    return b;
+  };
+  const blank = new Uint8Array(16).fill(0xFF), key = (b) => b.join(',');
+  const slot = new Map([[key(blank), 0]]), tiles = [blank], map = new Uint8Array(32 * 18);
+  // fill the map: picture cells in order (first appearance), border cells use the blank tile
+  for (let ty = 0; ty < 18; ty++) for (let tx = 0; tx < 20; tx++) {
+    const b = tileBytes(ty, tx), k = key(b);
+    if (!slot.has(k)) { slot.set(k, tiles.length); tiles.push(b); }
+    map[ty * 32 + tx] = slot.get(k);
+  }
+  if (tiles.length > 256) throw new Error(tiles.length + ' unique tiles: more than 256');
+  const tb = new Uint8Array(tiles.length * 16); tiles.forEach((t, i) => tb.set(t, i * 16));
+  const gpal = PALETTES.gb[opt.palette || 'grey'].rgb;
+  return {
+    preview: { w: 160, h: 144, idx: scrn, pal: gpal }, changed: 0, total: 160 * 144,
+    files: [{ name: 'tiles.bin', bytes: tb, note: 'VRAM $8000' }, { name: 'map.bin', bytes: map, note: 'VRAM $9800 (18 rows of 32)' }],
+    info: { tiles: tiles.length, levels: cent ? cent.map((v) => Math.round(v)) : th },
+  };
+}
+
+// ---------------------------------------------------------------- NES (as nes_convert2.py)
+function combos3(arr) { const o = []; for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) for (let k = j + 1; k < arr.length; k++) o.push([arr[i], arr[j], arr[k]]); return o; }
+function nes(img, opt) {
+  const npal = PALETTES.nes.ntsc.rgb, W = 256;
+  const scr = screenRGB(img, 256, 240, opt, 8, 16);
+  const L = scr.L, ROW0 = L.dy / 8, picRows = Math.ceil(L.dh / 8), H = 240;
+  // NES colour per pixel: Amy's TMS9918A table when every source pixel is a TMS9918A colour
+  // (and no dithering), otherwise the nearest usable NES colour (with dithering)
+  const tmsPal = PALETTES.tms.mame.rgb;
+  const tmsIndex = new Map(); for (let i = 15; i >= 1; i--) tmsIndex.set(tmsPal[i].join(','), i);
+  let fromTMS = (!opt.dither || opt.dither === 'none') && opt.nesMap !== 'nearest';
+  if (fromTMS) for (let i = 0; i < 256 * 240 && fromTMS; i++) { if (!scr.inside[i]) continue; const k = [0, 1, 2].map((c) => scr.rgb[i * 3 + c]).join(','); if (!tmsIndex.has(k)) fromTMS = false; }
+  let img2;
+  if (fromTMS) { img2 = new Int16Array(256 * 240).fill(0x0F); for (let i = 0; i < img2.length; i++) if (scr.inside[i]) img2[i] = TMS2NES[tmsIndex.get([0, 1, 2].map((c) => scr.rgb[i * 3 + c]).join(','))]; }
+  else img2 = quantise(scr, 256, 240, npal, NES_USABLE, opt).map((c) => (npal[c].join() === '0,0,0' ? 0x0F : c));
+  // keep at most 13 colours (the palette search is cubic in the number of colours)
+  {
+    const n = new Map(); for (let i = 0; i < img2.length; i++) if (img2[i] !== 0x0F) n.set(img2[i], (n.get(img2[i]) || 0) + 1);
+    if (n.size > 13) {
+      const keep = [...n.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 13).map((e) => e[0]);
+      for (let i = 0; i < img2.length; i++) if (img2[i] !== 0x0F && !keep.includes(img2[i])) { const c = img2[i]; img2[i] = nearest(npal[c][0], npal[c][1], npal[c][2], npal, keep); }
+    }
+  }
+  const at = (x, y) => img2[y * W + x];
+  const F = opt.protect || null;                       // protect box [x0, y0, x1, y1] (screen pixels)
+  const inF = (x, y) => F && F[0] <= x && x < F[2] && F[1] <= y && y < F[3];
+  const WCOL = { 0x16: 20, 0x06: 20, 0x38: 12, 0x28: 12, 0x30: 4 };
+  const weight = (x, y, c) => { let w = WCOL[c] || 1; if (inF(x, y)) w *= 4; return w; };
+  // attribute areas of the picture (16x16), weighted colour counts
+  const areaRows = Math.ceil(picRows / 2), A0 = ROW0 / 2;
+  const areas = [];
+  for (let ay = 0; ay < areaRows; ay++) for (let ax = 0; ax < 16; ax++) {
+    const wc = new Map();
+    for (let y = (A0 + ay) * 16; y < (A0 + ay) * 16 + 16 && y < H; y++) for (let x = ax * 16; x < ax * 16 + 16; x++) {
+      const c = at(x, y); if (c === 0x0F) continue; wc.set(c, (wc.get(c) || 0) + weight(x, y, c));
+    }
+    areas.push({ ay, ax, wc });
+  }
+  const colours = [...new Set(areas.flatMap((a) => [...a.wc.keys()]))].sort((a, b) => a - b);
+  while (colours.length < 3) { const extra = [0x00, 0x10, 0x30].find((c) => !colours.includes(c)); colours.push(extra); colours.sort((a, b) => a - b); }
+  const triples = combos3(colours);
+  const cost = areas.map((a) => triples.map((t) => { let s = 0; for (const [c, w] of a.wc) if (!t.includes(c)) s += w; return s; }));
+  const total = (pl) => { let s = 0; for (let k = 0; k < areas.length; k++) { let m = Infinity; for (const p of pl) if (cost[k][p] < m) m = cost[k][p]; s += m; } return s; };
+  let pals = [];
+  for (let n = 0; n < 4; n++) { let best = 0, bv = Infinity; for (let t = 0; t < triples.length; t++) { const v = total(pals.concat([t])); if (v < bv) { bv = v; best = t; } } pals.push(best); }
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < 4; i++) for (let t = 0; t < triples.length; t++) {
+      const trial = pals.slice(0, i).concat([t], pals.slice(i + 1));
+      if (total(trial) < total(pals)) { pals = trial; improved = true; }
+    }
+  }
+  const apal = areas.map((a, k) => { let bi = 0; for (let i = 1; i < 4; i++) if (cost[k][pals[i]] < cost[k][pals[bi]]) bi = i; return bi; });
+  const P = pals.map((t) => triples[t]);
+  const apalAt = (x, y) => { const ay = Math.floor(y / 16) - A0; if (ay < 0 || ay >= areaRows) return 0; return apal[ay * 16 + Math.floor(x / 16)]; };
+  const dist = (a, b) => d2(npal[a][0], npal[a][1], npal[a][2], npal[b]);
+  const nesc = new Int16Array(W * H), idx = new Uint8Array(W * H); let changed = 0, changedF = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const c = at(x, y), choices = [0x0F, ...P[apalAt(x, y)]];
+    let bi = 0, bk = [2, Infinity];
+    for (let j = 0; j < 4; j++) { const k = [choices[j] === c ? 0 : 1, dist(c, choices[j])]; if (k[0] < bk[0] || (k[0] === bk[0] && k[1] < bk[1])) { bk = k; bi = j; } }
+    nesc[y * W + x] = choices[bi]; idx[y * W + x] = bi;
+    if (choices[bi] !== c) { changed++; if (inF(x, y)) changedF++; }
+  }
+  // sprite overlay inside the protect box (nes_convert2.py --sprites)
+  let sprites = [], spals = [];
+  if (opt.sprites && F) {
+    const cells = [];
+    for (let cy = Math.floor(F[1] / 8); cy < Math.floor(F[3] / 8); cy++) for (let cx = Math.floor(F[0] / 8); cx < Math.floor(F[2] / 8); cx++) {
+      const bad = [];
+      for (let y = cy * 8; y < cy * 8 + 8; y++) for (let x = cx * 8; x < cx * 8 + 8; x++) if (nesc[y * W + x] !== at(x, y)) bad.push([x, y]);
+      if (bad.length) cells.push({ n: bad.length, cx, cy, bad });
+    }
+    cells.sort((a, b) => b.n - a.n || b.cx - a.cx || b.cy - a.cy);
+    const sc = new Map();
+    for (const cl of cells) for (const [x, y] of cl.bad) sc.set(at(x, y), (sc.get(at(x, y)) || 0) + 1);
+    const common = [...sc.entries()].map((e, i) => [e[0], e[1], i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]).slice(0, 12).map((e) => e[0]);
+    for (let i = 0; i < common.length && spals.length < 4; i += 3) spals.push(common.slice(i, i + 3));
+    const perLine = new Map();
+    for (const cl of cells) {
+      if (!spals.length) break;
+      const need = new Set(cl.bad.map(([x, y]) => at(x, y)));
+      let p = spals.findIndex((sp) => [...need].every((c) => sp.includes(c)));
+      if (p < 0) { let bv = -1; spals.forEach((sp, i) => { const v = cl.bad.filter(([x, y]) => sp.includes(at(x, y))).length; if (v > bv) { bv = v; p = i; } }); }
+      const lines = []; for (let l = cl.cy * 8; l < cl.cy * 8 + 8; l++) lines.push(l);
+      if (sprites.length >= 63 || lines.some((l) => (perLine.get(l) || 0) >= 7)) continue;
+      for (const l of lines) perLine.set(l, (perLine.get(l) || 0) + 1);
+      sprites.push({ cx: cl.cx, cy: cl.cy, p, px: cl.bad.filter(([x, y]) => spals[p].includes(at(x, y))) });
+    }
+    for (const s of sprites) for (const [x, y] of s.px) nesc[y * W + x] = at(x, y);
+  }
+  let changedAfter = 0, faceAfter = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (nesc[y * W + x] !== at(x, y)) { changedAfter++; if (inF(x, y)) faceAfter++; }
+  const tileBytes = (get) => { const b = new Uint8Array(16); for (let r = 0; r < 8; r++) { let a = 0, c = 0; for (let x = 0; x < 8; x++) { const i = get(r, x); a |= (i & 1) << (7 - x); c |= (i >> 1) << (7 - x); } b[r] = a; b[8 + r] = c; } return b; };
+  const key = (b) => b.join(',');
+  const tables = [[new Uint8Array(16)], [new Uint8Array(16)]], tkeys = [new Map([[key(new Uint8Array(16)), 0]]), new Map([[key(new Uint8Array(16)), 0]])];
+  const addTile = (h, b) => { const k = key(b); if (!tkeys[h].has(k)) { tkeys[h].set(k, tables[h].length); tables[h].push(b); } return tkeys[h].get(k); };
+  const half = Math.floor(picRows / 2);
+  const nt = new Uint8Array(960);
+  for (let ty = 0; ty < picRows; ty++) {
+    const h = ty < half ? 0 : 1;
+    for (let tx = 0; tx < 32; tx++) nt[(ty + ROW0) * 32 + tx] = addTile(h, tileBytes((r, x) => idx[((ty + ROW0) * 8 + r) * W + tx * 8 + x]));
+  }
+  const sprTiles = sprites.map((s) => { const sp = spals[s.p]; const cell = Array.from({ length: 8 }, () => new Array(8).fill(0)); for (const [x, y] of s.px) cell[y - s.cy * 8][x - s.cx * 8] = sp.indexOf(at(x, y)) + 1; return addTile(0, tileBytes((r, x) => cell[r][x])); });
+  if (tables[0].length > 256 || tables[1].length > 256) throw new Error('pattern table full: ' + tables[0].length + ' / ' + tables[1].length + ' tiles');
+  const chr = new Uint8Array(8192);
+  tables.forEach((tl, i) => tl.forEach((b, j) => chr.set(b, i * 4096 + j * 16)));
+  const attr = new Uint8Array(64);
+  for (let ay = 0; ay < 8; ay++) for (let ax = 0; ax < 8; ax++) {
+    let v = 0;
+    [[0, 0], [0, 1], [1, 0], [1, 1]].forEach(([dy, dx], q) => { const sy = ay * 2 + dy - A0; if (sy >= 0 && sy < areaRows) v |= apal[sy * 16 + ax * 2 + dx] << (2 * q); });
+    attr[ay * 8 + ax] = v;
+  }
+  const palb = [];
+  for (const p of P) palb.push(0x0F, ...p);
+  const spFull = spals.map((sp) => sp.concat([0x0F, 0x0F, 0x0F]).slice(0, 3)); while (spFull.length < 4) spFull.push([0x0F, 0x0F, 0x0F]);
+  for (const sp of spFull) palb.push(0x0F, ...sp);
+  // split marker (sprite 0) on the last line of the top half
+  const sy = ROW0 + half - 1, py = (sy - ROW0) * 8 + 7;
+  let hx = -1; for (let x = 0; x < W - 8; x++) if (idx[(py + ROW0 * 8) * W + x] !== 0) hx = x;
+  const oam = new Uint8Array(256).fill(0xF8);
+  let splitInfo = 'no opaque pixel on the split line: no sprite 0 marker';
+  if (hx >= 0) {
+    const marker = Array.from({ length: 8 }, () => new Array(8).fill(0)); marker[7][hx % 8] = 1;
+    const mt = tileBytes((r, x) => marker[r][x]); const mk = key(mt);
+    if (!tkeys[0].has(mk)) { tkeys[0].set(mk, tables[0].length); tables[0].push(mt); chr.set(mt, (tables[0].length - 1) * 16); }
+    oam.set([sy * 8 - 1, tkeys[0].get(mk), 0x20, Math.floor(hx / 8) * 8], 0);
+    splitInfo = `sprite 0: tile row ${sy}, column ${Math.floor(hx / 8)}, hit on picture line ${py} at x ${hx}`;
+  }
+  sprites.forEach((s, n) => oam.set([(s.cy) * 8 - 1, sprTiles[n], s.p, s.cx * 8], (n + 1) * 4));
+  // preview in NES colours
+  const prevIdx = new Int16Array(W * H); for (let i = 0; i < prevIdx.length; i++) prevIdx[i] = nesc[i];
+  return {
+    preview: { w: W, h: H, idx: prevIdx, pal: npal }, changed: changedAfter, total: W * H,
+    files: [{ name: 'chr.bin', bytes: chr, note: 'PPU $0000 (both pattern tables)' }, { name: 'nametable.bin', bytes: nt, note: 'PPU $2000' },
+      { name: 'attribute.bin', bytes: attr, note: 'PPU $23C0' }, { name: 'nt.bin', bytes: Uint8Array.from([...nt, ...attr]), note: 'PPU $2000, nametable + attributes (1024)' },
+      { name: 'palette.bin', bytes: Uint8Array.from(palb), note: 'PPU $3F00' }, { name: 'oam.bin', bytes: oam, note: 'OAM: sprite 0 split marker + overlay sprites' }],
+    info: { tmsMap: fromTMS, recoloured: changed, recolouredProtect: changedF, sprites: sprites.length, after: changedAfter, protectAfter: faceAfter, tiles: [tables[0].length, tables[1].length], split: splitInfo, palettes: P.map((p) => p.map((c) => c.toString(16).padStart(2, '0'))) },
+  };
+}
+
+function convert(machine, img, opt) {
+  if (machine === 'tms') return tms(img, opt);
+  if (machine === 'c64h') return c64(img, opt, false);
+  if (machine === 'c64m') return c64(img, opt, true);
+  if (machine === 'gb') return gb(img, opt);
+  if (machine === 'nes') return nes(img, opt);
+  throw new Error('unknown machine ' + machine);
+}
+return { convert, PALETTES, layout };
+})();
+
+
+const PLETTER_LIB = (() => {
+/**
+ * Pletter v0.5 Compression Codec
+ * Created by XL2S Entertainment (Sander Zuidema) in 2008
+ * Designed for fast decompression on Z80 processors
+ * Popular for MSX, ZX Spectrum, and other 8-bit platforms
+ */
+
+class PletterCodec {
+    constructor() {
+        this.MAX_LEN = 65536;
+        this.maxlen = [128, 128 + 128, 512 + 128, 1024 + 128, 2048 + 128, 4096 + 128, 8192 + 128];
+        this.varcost = new Array(65536);
+        this.dataDest = new Uint8Array(512 * 1024);
+        this.indexDest = 0;
+        this.bitMask = 0;
+        this.bitIndex = 0;
+        this.eventPos = 0;
+        this.dataPos = 0;
+        this.pendingBits = 0;
+        this.eventByte = 0;
+        this.dsk2rom_tweak = false;
+
+        this.inputDecompressData = null;
+        this.inputDecompressIndex = 0;
+        this.decompressBitIndex = 0;
+        this.decompressBitForVarPosition = 7;
+
+        this.initVarCost();
+    }
+
+    initVarCost() {
+        let v = 1, b = 1, r = 1;
+        while (r !== 65536) {
+            for (let j = 0; j !== r; ++j) {
+                if (v < this.varcost.length) {
+                    this.varcost[v++] = b;
+                } else {
+                    break;
+                }
+            }
+            b += 2;
+            r *= 2;
+        }
+    }
+
+    createMetadata(data) {
+        const length = data.length;
+        const last = new Array(65536).fill(-1);
+        const prev = new Array(length + 1);
+        const metadata = new Array(length + 1);
+
+        for (let i = 0; i < length + 1; i++) {
+            metadata[i] = {
+                reeks: 0,
+                cpos: new Array(7).fill(0),
+                clen: new Array(7).fill(0)
+            };
+        }
+
+        for (let i = 0; i !== length; ++i) {
+            metadata[i].cpos[0] = metadata[i].clen[0] = 0;
+            const index = data[i] + (i + 1 < length ? data[i + 1] * 256 : 0);
+            prev[i] = last[index];
+            last[index] = i;
+        }
+
+        let r = -1, t = 0;
+        for (let i = length - 1; i !== -1; --i) {
+            if (data[i] === r) {
+                metadata[i].reeks = ++t;
+            } else {
+                r = data[i];
+                metadata[i].reeks = t = 1;
+            }
+        }
+
+        for (let bl = 0; bl !== 7; ++bl) {
+            for (let i = 0; i < length; ++i) {
+                let p = i;
+                if (bl) {
+                    metadata[i].clen[bl] = metadata[i].clen[bl - 1];
+                    metadata[i].cpos[bl] = metadata[i].cpos[bl - 1];
+                    p = i - metadata[i].cpos[bl];
+                }
+
+                while ((p = prev[p]) !== -1) {
+                    if (i - p > this.maxlen[bl]) break;
+
+                    let l = 0;
+                    while (data[p + l] === data[i + l] && (i + l) < length) {
+                        if (metadata[i + l].reeks > 1) {
+                            let j = metadata[i + l].reeks;
+                            if (j > metadata[p + l].reeks) j = metadata[p + l].reeks;
+                            l += j;
+                        } else {
+                            ++l;
+                        }
+                    }
+
+                    if (l > metadata[i].clen[bl]) {
+                        metadata[i].clen[bl] = l;
+                        metadata[i].cpos[bl] = i - p;
+                    }
+                }
+            }
+        }
+
+        return { metadata, prev, last };
+    }
+
+    getLen(data, metadata, q) {
+        const length = data.length;
+        const p = new Array(length + 1);
+
+        for (let i = 0; i <= length; i++) {
+            p[i] = { cost: 0, mode: 0, mlen: 0 };
+        }
+
+        p[length].cost = 0;
+
+        for (let i = length - 1; i !== -1; --i) {
+            let kmode = 0, kl = 0;
+            let kc = 9 + p[i + 1].cost;
+
+            let j = metadata[i].clen[0];
+            while (j > 1) {
+                const cost_var = this.varcost[j - 1];
+                let varcost_val = cost_var !== undefined ? cost_var : 1000000;
+                const cc = 9 + varcost_val + p[i + j].cost;
+                if (cc < kc) {
+                    kc = cc; kmode = 1; kl = j;
+                }
+                --j;
+            }
+
+            j = metadata[i].clen[q];
+            const ccc = q === 1 ? 9 : 9 + q;
+            while (j > 1) {
+                const cost_var = this.varcost[j - 1];
+                let varcost_val = cost_var !== undefined ? cost_var : 1000000;
+                const cc = ccc + varcost_val + p[i + j].cost;
+                if (cc < kc) {
+                    kc = cc; kmode = 2; kl = j;
+                }
+                --j;
+            }
+
+            p[i].cost = kc; p[i].mode = kmode; p[i].mlen = kl;
+        }
+        return { cost: p[0].cost, pakdata: p };
+    }
+
+    _writeByte(value) {
+        this.dataDest[this.dataPos++] = value & 0xFF;
+    }
+
+    _addBit(bit) {
+        if (this.pendingBits === 0) this._claimEvent();
+        this.eventByte *= 2;
+        ++this.pendingBits;
+        if (bit) ++this.eventByte;
+        if (this.pendingBits === 8) this._addEvent();
+    }
+
+    _add3(value) {
+        this._addBit(value & 4);
+        this._addBit(value & 2);
+        this._addBit(value & 1);
+    }
+
+    _addVar(i) {
+        let j = 32768;
+        while (!(i & j)) j = Math.floor(j / 2);
+
+        do {
+            if (j === 1) {
+                this._addBit(0);
+                return;
+            }
+            j = Math.floor(j / 2);
+            this._addBit(1);
+            if (i & j) {
+                this._addBit(1);
+            } else {
+                this._addBit(0);
+            }
+        } while (true);
+    }
+
+    _addData(value) {
+        this._writeByte(value);
+    }
+
+    _addEvent() {
+        this.dataDest[this.eventPos] = this.eventByte;
+        this.eventByte = this.pendingBits = 0;
+    }
+
+    _claimEvent() {
+        this.eventPos = this.dataPos;
+        ++this.dataPos;
+    }
+
+    _done() {
+        if (this.pendingBits !== 0) {
+            while (this.pendingBits !== 8) {
+                this.eventByte *= 2;
+                ++this.pendingBits;
+            }
+            this._addEvent();
+        }
+        this.indexDest = this.dataPos;
+    }
+
+    save(data, metadata, pakdata, q) {
+        const length = data.length;
+        this.eventPos = this.dataPos = this.pendingBits = this.eventByte = 0;
+
+        this._add3(q - 1);
+        this._addData(data[0]);
+
+        let i = 1;
+        let j = 0;
+        while (i < length) {
+            switch (pakdata[i].mode) {
+                case 0:
+                    this._addBit(0);
+                    this._addData(data[i]);
+                    ++i;
+                    break;
+                case 1:
+                    this._addBit(1);
+                    this._addVar(pakdata[i].mlen - 1);
+                    j = metadata[i].cpos[0] - 1;
+                    if (j > 127) {
+                        console.warn(`Pletter: cpos[0] (${j + 1}) > 128 for mode 1`);
+                    }
+                    this._addData(j);
+                    i += pakdata[i].mlen;
+                    break;
+                case 2:
+                    this._addBit(1);
+                    this._addVar(pakdata[i].mlen - 1);
+                    j = metadata[i].cpos[q] - 1;
+                    if (j < 128) {
+                        console.warn(`Pletter: cpos[q] (${j + 1}) < 128 for mode 2`);
+                    }
+                    j -= 128;
+                    this._addData(128 | (j & 127));
+
+                    switch (q) {
+                        case 6: this._addBit(j & 4096);
+                        case 5: this._addBit(j & 2048);
+                        case 4: this._addBit(j & 1024);
+                        case 3: this._addBit(j & 512);
+                        case 2: this._addBit(j & 256);
+                            this._addBit(j & 128);
+                        case 1:
+                            break;
+                        default:
+                            console.warn('Pletter: Invalid q value in save');
+                            break;
+                    }
+                    i += pakdata[i].mlen;
+                    break;
+                default:
+                    console.warn('Pletter: Unknown mode');
+                    break;
+            }
+        }
+
+        for (let i = 0; i !== 34; ++i) this._addBit(1);
+        this._done();
+    }
+
+    async compress(data, options = {}) {
+        if (data.length === 0) return new Uint8Array([]);
+
+        if (data.length > this.MAX_LEN) {
+            throw new Error(`Pletter: Input file size (${data.length} bytes) exceeds 64KB limit for this codec.`);
+        }
+
+        const { metadata } = this.createMetadata(data);
+
+        let minlen = data.length * 1000;
+        let minbl = 0;
+
+        for (let i = 1; i !== 7; ++i) {
+            const { cost, pakdata } = this.getLen(data, metadata, i);
+            if (cost < minlen && i) {
+                minlen = cost;
+                minbl = i;
+            }
+        }
+
+        if (minbl === 0 && data.length > 0) {
+            minbl = 1;
+        }
+
+        const { pakdata: bestPakdata } = this.getLen(data, metadata, minbl);
+        this.save(data, metadata, bestPakdata, minbl);
+
+        return new Uint8Array(this.dataDest.slice(0, this.indexDest));
+    }
+
+    async decompress(compressedData, options = {}) {
+        const dsk2rom = !!options.dsk2rom;
+
+        let dataPosition = 0;
+        let varPosition = 0;
+        let bitForVarPosition = 7;
+
+        const output = [];
+
+        const getByte = () => {
+            if (dataPosition >= compressedData.length) {
+                throw new Error('Pletter decompression: Unexpected end of input');
+            }
+            return compressedData[dataPosition++];
+        };
+
+        const getBit = () => {
+            if (bitForVarPosition === 7) {
+                varPosition = dataPosition;
+                dataPosition = varPosition + 1;
+            }
+
+            const bit = (compressedData[varPosition] >> bitForVarPosition) & 1;
+            bitForVarPosition--;
+
+            if (bitForVarPosition === -1) {
+                bitForVarPosition = 7;
+            }
+            return bit;
+        };
+
+        const getInterlacedEliasGamma = () => {
+            let value = 1;
+            while (getBit()) {
+                value = (value << 1) | getBit();
+            }
+            return value;
+        };
+
+        let qValue = 2;
+        if (!dsk2rom) {
+            qValue = (getBit() << 2 | getBit() << 1 | getBit()) + 1;
+        }
+
+        const firstByte = getByte();
+        output.push(firstByte);
+        dataPosition = dsk2rom ? 1 : 2;
+
+        const END_MARKER_NORMAL = 262143;
+        const END_MARKER_DSK2ROM = 131072;
+
+        while (dataPosition < compressedData.length) {
+            if (getBit()) {
+                let length = getInterlacedEliasGamma() + 1;
+
+                if (length === END_MARKER_NORMAL || (dsk2rom && length === END_MARKER_DSK2ROM)) {
+                    break;
+                }
+
+                let offset = getByte();
+                if (offset & 0x80) {
+                    offset &= 0x7F;
+
+                    switch (qValue) {
+                        case 7: offset |= getBit() << 13;
+                        case 6: offset |= getBit() << 12;
+                        case 5: offset |= getBit() << 11;
+                        case 4: offset |= getBit() << 10;
+                        case 3: offset |= getBit() << 9;
+                        case 2:
+                            offset |= getBit() << 8;
+                            offset |= getBit() << 7;
+                        case 1:
+                            break;
+                        default:
+                            throw new Error(`Invalid q_value: ${qValue}`);
+                    }
+                    offset += 128;
+                }
+                offset += 1;
+
+                for (let i = 0; i < length; i++) {
+                    const sourceIndex = output.length - offset;
+                    if (sourceIndex < 0 || sourceIndex >= output.length) {
+                        throw new Error(`Invalid offset ${offset} at position ${output.length}`);
+                    }
+                    output.push(output[sourceIndex]);
+                }
+            } else {
+                output.push(getByte());
+            }
+        }
+
+        return new Uint8Array(output);
+    }
+
+    isReady() { 
+        return true; 
+    }
+}
+return { PletterCodec };
+})();
+const T = {
+  fr: {
+    title: 'Convertisseur d\'images', subtitle: 'images vers fichiers bruts pour machines 8 bits (pour le compresseur AMYZ)',
+    image: 'Image', dropText: 'Déposez ici une image PNG, JPG ou GIF.', choose: 'Choisir une image', machine: 'Machine et mode',
+    options: 'Options', fit: 'Cadrage', fitFit: 'Redimensionner (image entière)', fitFill: 'Recadrer (remplir l\'écran)', fitNone: 'Taille réelle (centrée)',
+    palette: 'Palette', cropX: 'Position horizontale du recadrage', cropY: 'Position verticale du recadrage', dither: 'Tramage', dNone: 'Aucun', dOrdered: 'Ordonné (Bayer 4x4)',
+    strength: 'Force du tramage', brightness: 'Luminosité', contrast: 'Contraste',
+    normalize: 'Réécrire les paires motif/couleur équivalentes (mêmes pixels, compresse mieux)', pletter: 'Fichiers Pletter et source CVBasic', pletterHint: 'Ajoute les fichiers .plet (compression Pletter 0.5c, identique à l\'outil d\'origine) et un extrait CVBasic prêt à coller. Les fichiers bruts ne changent pas.',
+    cvbTitle: 'Source CVBasic (Pletter)', copy: 'Copier', copied: 'Copié.', cvbWorking: 'Compression Pletter...',
+    cvbForm0: 'MODE 0 : au plus 256 tuiles uniques, DEFINE CHAR PLETTER et DEFINE COLOR PLETTER, puis SCREEN pour la table des noms.',
+    cvbForm1: 'MODE 1 (bitmap) : DEFINE VRAM PLETTER pour les motifs et les couleurs.',
+    cvbForm2: 'MODE 1 (bitmap) avec tuiles fusionnées par tiers : DEFINE VRAM PLETTER pour les motifs et les couleurs, puis SCREEN pour la table des noms (plus de 256 tuiles uniques : DEFINE CHAR ne suffit pas).',
+    dedup: 'Fusionner les tuiles identiques (table des noms, motifs uniques par tiers)', dedupHint: 'Sans fusion : table des noms 0 à 255 trois fois, comme un bitmap.',
+    levels: 'Niveaux de gris', levelsAuto: 'Automatiques (k-moyennes)', levelsManual: 'Seuils manuels', th0: 'Seuil noir / gris foncé', th1: 'Seuil gris foncé / gris clair', th2: 'Seuil gris clair / blanc',
+    protectDraw: 'Dessiner la zone protégée', protectDrawing: 'Tracez un rectangle sur l\'aperçu machine', protectClear: 'Effacer la zone',
+    protectHint: 'La zone protégée (un visage, par exemple) compte quatre fois plus dans le choix des palettes ; des sprites y rétablissent les couleurs perdues.',
+    sprites: 'Sprites de correction dans la zone protégée', nesMap: 'Couleurs NES', nesMapAuto: 'Auto (table TMS9918A vers NES si l\'image utilise cette palette)', nesMapNearest: 'Couleur NES la plus proche',
+    preview: 'Comparaison', zoom: 'Zoom', orig: 'Original (cadré)', machinePrev: 'Aperçu machine', outputs: 'Fichiers bruts',
+    download: 'Télécharger', changed: 'Pixels modifiés : ', of: ' sur ', noImage: 'Choisissez une image.', converting: 'Conversion...', error: 'Erreur : ',
+    loaded: 'Image chargée : ', outHintC64: 'Adresses suggérées : utilisez fichier@adresse dans le compresseur AMYZ (C64).', outHintRaw: 'Ces fichiers vont tels quels dans le compresseur AMYZ (machine correspondante).',
+    themeAuto: 'Thème : auto', themeLight: 'Thème : clair', themeDark: 'Thème : sombre',
+    footer: 'Convertisseur d\'images pour Amy Studio, avec Claude. Aucune compression ici : les fichiers produits vont dans le compresseur AMYZ. Tout fonctionne dans le navigateur, sans réseau.',
+    mTms: 'TMS9918A mode 2', mTmsSub: 'ColecoVision, MSX, SG-1000, TI-99/4A', mC64h: 'C64 haute résolution', mC64hSub: '320 x 200, 2 couleurs par case', mC64m: 'C64 multicolore', mC64mSub: '160 x 200, 4 couleurs par case',
+    mGb: 'Game Boy', mGbSub: '160 x 144, 4 gris', mNes: 'NES', mNesSub: '256 x 240, palettes d\'attributs',
+    iTiles: 'tuiles uniques', iUniq: 'motifs uniques par tiers', iBg: 'couleur de fond', iLevels: 'niveaux', iRecol: 'recolorés par les attributs', iSprites: 'sprites', iTms: 'table TMS9918A vers NES', iTables: 'tuiles (tables 0 / 1)',
+  },
+  en: {
+    title: 'Image converter', subtitle: 'images to raw files for 8-bit machines (for the AMYZ packer)',
+    image: 'Image', dropText: 'Drop a PNG, JPG or GIF image here.', choose: 'Choose an image', machine: 'Machine and mode',
+    options: 'Options', fit: 'Framing', fitFit: 'Resize (whole picture)', fitFill: 'Crop (fill the screen)', fitNone: 'Actual size (centred)',
+    palette: 'Palette', cropX: 'Horizontal crop position', cropY: 'Vertical crop position', dither: 'Dithering', dNone: 'None', dOrdered: 'Ordered (Bayer 4x4)',
+    strength: 'Dither strength', brightness: 'Brightness', contrast: 'Contrast',
+    normalize: 'Rewrite equivalent pattern/colour pairs (same pixels, packs better)', pletter: 'Pletter files and CVBasic source', pletterHint: 'Adds .plet files (Pletter 0.5c compression, identical to the original tool) and a ready-to-paste CVBasic snippet. The raw files do not change.',
+    cvbTitle: 'CVBasic source (Pletter)', copy: 'Copy', copied: 'Copied.', cvbWorking: 'Pletter compression...',
+    cvbForm0: 'MODE 0: at most 256 unique tiles, DEFINE CHAR PLETTER and DEFINE COLOR PLETTER, then SCREEN for the name table.',
+    cvbForm1: 'MODE 1 (bitmap): DEFINE VRAM PLETTER for patterns and colours.',
+    cvbForm2: 'MODE 1 (bitmap) with tiles merged per third: DEFINE VRAM PLETTER for patterns and colours, then SCREEN for the name table (more than 256 unique tiles: DEFINE CHAR is not enough).',
+    dedup: 'Merge identical tiles (name table, unique patterns per third)', dedupHint: 'Without merging: name table 0 to 255 three times, like a bitmap.',
+    levels: 'Grey levels', levelsAuto: 'Automatic (k-means)', levelsManual: 'Manual thresholds', th0: 'Black / dark grey threshold', th1: 'Dark / light grey threshold', th2: 'Light grey / white threshold',
+    protectDraw: 'Draw the protected area', protectDrawing: 'Drag a rectangle on the machine preview', protectClear: 'Clear the area',
+    protectHint: 'The protected area (a face, say) counts four times more when the palettes are chosen; sprites there restore lost colours.',
+    sprites: 'Correction sprites in the protected area', nesMap: 'NES colours', nesMapAuto: 'Auto (TMS9918A to NES table when the image uses that palette)', nesMapNearest: 'Nearest NES colour',
+    preview: 'Comparison', zoom: 'Zoom', orig: 'Original (framed)', machinePrev: 'Machine preview', outputs: 'Raw files',
+    download: 'Download', changed: 'Changed pixels: ', of: ' of ', noImage: 'Choose an image.', converting: 'Converting...', error: 'Error: ',
+    loaded: 'Image loaded: ', outHintC64: 'Suggested addresses: use file@address in the AMYZ packer (C64).', outHintRaw: 'These files go as they are into the AMYZ packer (same machine).',
+    themeAuto: 'Theme: auto', themeLight: 'Theme: light', themeDark: 'Theme: dark',
+    footer: 'Image converter for Amy Studio, made with Claude. No compression here: the files go into the AMYZ packer. Everything runs in the browser, with no network.',
+    mTms: 'TMS9918A mode 2', mTmsSub: 'ColecoVision, MSX, SG-1000, TI-99/4A', mC64h: 'C64 hires', mC64hSub: '320 x 200, 2 colours per cell', mC64m: 'C64 multicolour', mC64mSub: '160 x 200, 4 colours per cell',
+    mGb: 'Game Boy', mGbSub: '160 x 144, 4 greys', mNes: 'NES', mNesSub: '256 x 240, attribute palettes',
+    iTiles: 'unique tiles', iUniq: 'unique patterns per third', iBg: 'background colour', iLevels: 'levels', iRecol: 'recoloured by the attributes', iSprites: 'sprites', iTms: 'TMS9918A to NES table', iTables: 'tiles (tables 0 / 1)',
+  },
+};
+let lang = 'fr';
+try { const l = localStorage.getItem('amyz-lang'); if (l === 'fr' || l === 'en') lang = l; } catch (e) {}
+const t = (k) => T[lang][k] ?? k;
+const $ = (id) => document.getElementById(id);
+const MACHINES = [['tms', 'mTms', 'mTmsSub', 'tms'], ['c64h', 'mC64h', 'mC64hSub', 'c64'], ['c64m', 'mC64m', 'mC64mSub', 'c64'], ['gb', 'mGb', 'mGbSub', 'gb'], ['nes', 'mNes', 'mNesSub', 'nes']];
+let machine = 'tms', srcImg = null, srcName = 'image', protect = null, result = null, timer = 0;
+try { const m = localStorage.getItem('amyz-imgconv-machine'); if (MACHINES.some((x) => x[0] === m)) machine = m; } catch (e) {}
+
+// The artifact host only allows common file types, so each output is
+// wrapped in a small .zip (stored, no compression) before it is offered.
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = CRC_TABLE[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+function zipOne(name, data) {
+  const nm = new TextEncoder().encode(name), crc = crc32(data), n = data.length;
+  const out = new Uint8Array(30 + nm.length + n + 46 + nm.length + 22), v = new DataView(out.buffer);
+  let p = 0;
+  v.setUint32(p, 0x04034b50, true); v.setUint16(p + 4, 20, true); v.setUint32(p + 14, crc, true);
+  v.setUint32(p + 18, n, true); v.setUint32(p + 22, n, true); v.setUint16(p + 26, nm.length, true);
+  out.set(nm, p + 30); out.set(data, p + 30 + nm.length); p = 30 + nm.length + n;
+  const cd = p;
+  v.setUint32(p, 0x02014b50, true); v.setUint16(p + 4, 20, true); v.setUint16(p + 6, 20, true);
+  v.setUint32(p + 16, crc, true); v.setUint32(p + 20, n, true); v.setUint32(p + 24, n, true);
+  v.setUint16(p + 28, nm.length, true); out.set(nm, p + 46); p += 46 + nm.length;
+  v.setUint32(p, 0x06054b50, true); v.setUint16(p + 8, 1, true); v.setUint16(p + 10, 1, true);
+  v.setUint32(p + 12, p - cd, true); v.setUint32(p + 16, cd, true);
+  return out;
+}
+let downloadsNs;
+const downloadsReady = (window.claude && window.claude.use) ? window.claude.use('downloads').then((d) => { downloadsNs = d; return d; }).catch(() => null) : Promise.resolve(null);
+function blobSave(name, bytes) {
+  const blob = new Blob([bytes], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+function offerFile(name, bytes) {
+  const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const zipName = name + '.zip', zipped = zipOne(name, data);
+  if (downloadsNs) {
+    downloadsNs.save({ filename: zipName, data: zipped }).catch((e) => {
+      const code = e && e.code;
+      if (code === 'declined') return;
+      const msg = lang === 'en' ? 'Saving is not available here (' + code + ').' : "L'enregistrement n'est pas disponible ici (" + code + ').';
+      const st = (document.getElementById('status')||document.querySelector('[role=status]')); if (st) st.textContent = msg;
+    });
+  } else blobSave(zipName, zipped);
+}
+window.offerFile = offerFile;
+
+function applyTexts() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  $('langBtn').textContent = lang === 'fr' ? 'English' : 'Français';
+  $('langBtn').setAttribute('aria-label', lang === 'fr' ? 'Switch to English' : 'Passer en français');
+  updateTheme(); renderMachines(); renderOptions(); if (result) renderResult();
+}
+function updateTheme() { const th = document.documentElement.dataset.theme || 'auto'; $('themeBtn').textContent = t(th === 'light' ? 'themeLight' : th === 'dark' ? 'themeDark' : 'themeAuto'); }
+function renderMachines() {
+  const box = $('targets'); box.textContent = '';
+  for (const [id, n, sub] of MACHINES) {
+    const l = document.createElement('label'), i = document.createElement('input');
+    i.type = 'radio'; i.name = 'machine'; i.value = id; i.checked = id === machine;
+    i.addEventListener('change', () => { machine = id; try { localStorage.setItem('amyz-imgconv-machine', id); } catch (e) {} renderOptions(); schedule(); });
+    const a = document.createElement('span'); a.className = 't-name'; a.textContent = t(n);
+    const b = document.createElement('span'); b.className = 't-cpu'; b.textContent = t(sub);
+    l.append(i, a, b); box.append(l);
+  }
+}
+function renderOptions() {
+  const fam = MACHINES.find((m) => m[0] === machine)[3], sel = $('palette'), keep = sel.dataset.fam === fam ? sel.value : null;
+  sel.textContent = ''; sel.dataset.fam = fam;
+  for (const [k, p] of Object.entries(CONV.PALETTES[fam])) { const o = document.createElement('option'); o.value = k; o.textContent = p.name; sel.append(o); }
+  if (keep) sel.value = keep;
+  $('optTms').classList.toggle('hidden', machine !== 'tms');
+  $('optGb').classList.toggle('hidden', machine !== 'gb');
+  $('optNes').classList.toggle('hidden', machine !== 'nes');
+  $('thBox').classList.toggle('hidden', $('levels').value !== 'manual');
+  const fill = $('fit').value === 'fill';
+  $('cropXBox').classList.toggle('hidden', !fill); $('cropYBox').classList.toggle('hidden', !fill);
+  $('protectInfo').textContent = protect ? `(${protect[0]}, ${protect[1]}) - (${protect[2]}, ${protect[3]})` : '';
+}
+function options() {
+  return {
+    fit: $('fit').value, cropX: +$('cropX').value / 100, cropY: +$('cropY').value / 100, palette: $('palette').value,
+    dither: $('dither').value, strength: +$('strength').value, brightness: +$('brightness').value, contrast: +$('contrast').value,
+    dedup: $('dedup').checked, normalize: $('normalize').checked, levels: $('levels').value, thresholds: [+$('th0').value, +$('th1').value, +$('th2').value].sort((a, b) => a - b),
+    protect, sprites: $('sprites').checked, nesMap: $('nesMap').value,
+  };
+}
+function schedule() { clearTimeout(timer); timer = setTimeout(run, 60); }
+function run() {
+  if (!srcImg) { $('status').textContent = t('noImage'); return; }
+  try {
+    const t0 = performance.now();
+    result = CONV.convert(machine, srcImg, options());
+    result.ms = Math.round(performance.now() - t0);
+    $('status').textContent = ''; $('status').className = 'status';
+    renderResult();
+  } catch (e) { result = null; $('status').textContent = t('error') + e.message; $('status').className = 'status error'; $('outputs').textContent = ''; }
+}
+function drawIdx(canvas, pv) {
+  canvas.width = pv.w; canvas.height = pv.h;
+  const ctx = canvas.getContext('2d'), im = ctx.createImageData(pv.w, pv.h);
+  for (let i = 0; i < pv.w * pv.h; i++) { const c = pv.pal[pv.idx[i]]; im.data.set([c[0], c[1], c[2], 255], i * 4); }
+  ctx.putImageData(im, 0, 0);
+}
+function drawOrig(canvas, pv) {
+  // the source framed exactly as the converter frames it (same layout, nearest sampling for display)
+  const fam = machine === 'c64m' ? 0.5 : 1, SW = pv.w, SH = pv.h;
+  const snapX = machine === 'c64m' ? 4 : 8, snapY = machine === 'nes' ? 16 : 8;
+  const L = CONV.layout(srcImg, SW, SH, options(), snapX, snapY, fam);
+  canvas.width = SW; canvas.height = SH;
+  const ctx = canvas.getContext('2d'), im = ctx.createImageData(SW, SH);
+  for (let i = 0; i < SW * SH; i++) im.data.set([0, 0, 0, 255], i * 4);
+  for (let y = 0; y < L.dh; y++) for (let x = 0; x < L.dw; x++) {
+    const sx = L.ox + Math.min(L.cw - 1, Math.floor((x + 0.5) * L.cw / L.dw)), sy = L.oy + Math.min(L.ch - 1, Math.floor((y + 0.5) * L.ch / L.dh));
+    const s = (sy * srcImg.w + sx) * 3, d = ((y + L.dy) * SW + x + L.dx) * 4;
+    im.data.set([srcImg.rgb[s], srcImg.rgb[s + 1], srcImg.rgb[s + 2], 255], d);
+  }
+  ctx.putImageData(im, 0, 0);
+}
+function sizeCanvas(c, pv) { const z = +$('zoom').value; c.style.width = pv.w * z * (pv.aspect || 1) + 'px'; c.style.height = pv.h * z + 'px'; }
+function renderResult() {
+  const pv = result.preview;
+  drawIdx($('prevCanvas'), pv); drawOrig($('origCanvas'), pv);
+  if (machine === 'nes' && protect) { const ctx = $('prevCanvas').getContext('2d'); ctx.strokeStyle = '#ff00ff'; ctx.strokeRect(protect[0] + 0.5, protect[1] + 0.5, protect[2] - protect[0] - 1, protect[3] - protect[1] - 1); }
+  sizeCanvas($('prevCanvas'), pv); sizeCanvas($('origCanvas'), pv);
+  const pct = (100 * result.changed / result.total).toFixed(2);
+  $('stat').innerHTML = ''; const s1 = document.createElement('span'); s1.textContent = t('changed');
+  const s2 = document.createElement('strong'); s2.id = 'changedCount'; s2.textContent = result.changed.toLocaleString(lang === 'fr' ? 'fr-CA' : 'en-CA');
+  const s3 = document.createElement('span'); s3.textContent = t('of') + result.total.toLocaleString(lang === 'fr' ? 'fr-CA' : 'en-CA') + ' (' + pct + ' %)';
+  $('stat').append(s1, s2, s3);
+  const i = result.info, parts = [];
+  if (i.tiles !== undefined && !Array.isArray(i.tiles)) parts.push(t('iTiles') + ' ' + i.tiles);
+  if (i.uniq) parts.push(t('iUniq') + ' ' + i.uniq.join(' / '));
+  if (i.background !== undefined) parts.push(t('iBg') + ' ' + i.background);
+  if (i.levels) parts.push(t('iLevels') + ' ' + i.levels.join(', '));
+  if (i.recoloured !== undefined) parts.push(t('iRecol') + ' ' + i.recoloured, t('iSprites') + ' ' + i.sprites, t('iTables') + ' ' + i.tiles.join(' / '), i.split, (i.tmsMap ? t('iTms') : t('nesMapNearest')));
+  parts.push(result.ms + ' ms');
+  $('infoLine').textContent = parts.join(' - ');
+  const ul = $('outputs'); ul.textContent = '';
+  const base = srcName.replace(/\.[^.]*$/, '').replace(/[^A-Za-z0-9_-]+/g, '_') || 'image';
+  for (const f of result.files) {
+    const li = document.createElement('li'), c = document.createElement('code');
+    const fname = base + '_' + f.name;
+    c.textContent = fname + ' (' + f.bytes.length + ' B)';
+    const tag = document.createElement('span'); tag.className = 'addr-tag';
+    tag.textContent = f.addr !== undefined ? '@$' + f.addr.toString(16).padStart(4, '0') + (f.note ? ' (' + f.note + ')' : '') : (f.note || '');
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = t('download'); b.setAttribute('aria-label', t('download') + ' ' + fname);
+    b.addEventListener('click', () => offerFile(fname, f.bytes));
+    const left = document.createElement('div'); left.append(c, document.createElement('br'), tag);
+    li.append(left, b); ul.append(li);
+  }
+  $('outHint').textContent = machine.startsWith('c64') ? t('outHintC64') : t('outHintRaw');
+  renderPletter();
+}
+
+// ---------------------------------------------------------------- Pletter + CVBasic (TMS9918A mode 2)
+const hexb = (b) => '$' + b.toString(16).padStart(2, '0');
+function dataLines(label, bytes) {
+  const out = [label + ':'];
+  for (let i = 0; i < bytes.length; i += 8) out.push('\tDATA BYTE ' + Array.from(bytes.subarray(i, i + 8), hexb).join(','));
+  return out.join('\n');
+}
+let pletterToken = 0;
+async function renderPletter() {
+  const box = $('cvbBox');
+  if (machine !== 'tms' || !$('pletter').checked || !result) { box.classList.add('hidden'); return; }
+  const token = ++pletterToken, r = result;
+  box.classList.remove('hidden'); $('cvbHint').textContent = t('cvbWorking'); $('cvbSrc').textContent = '';
+  const [pat, col, nam] = ['pattern.bin', 'color.bin', 'name.bin'].map((n) => r.files.find((f) => f.name === n).bytes);
+  const merged = $('dedup').checked;
+  // form 0 (MODE 0): one set of at most 256 tiles shared by the three thirds
+  // form 1 (MODE 1 bitmap), form 2 (MODE 1 with tiles merged per third + SCREEN names)
+  let form = merged ? 2 : 1, chars = null;
+  if (merged) {
+    const keyOf = (cell) => Array.from(pat.subarray(cell * 8, cell * 8 + 8)).concat(Array.from(col.subarray(cell * 8, cell * 8 + 8))).join(',');
+    const seen = new Map(), gname = new Uint8Array(768), order = [];
+    for (let i = 0; i < 768; i++) {
+      const cell = Math.floor(i / 256) * 256 + nam[i], k = keyOf(cell);
+      if (!seen.has(k)) { seen.set(k, seen.size); order.push(cell); }
+      gname[i] = seen.get(k) & 255;
+    }
+    if (seen.size <= 256) {
+      form = 0;
+      const cp = new Uint8Array(order.length * 8), cc = new Uint8Array(order.length * 8);
+      order.forEach((cell, j) => { cp.set(pat.subarray(cell * 8, cell * 8 + 8), j * 8); cc.set(col.subarray(cell * 8, cell * 8 + 8), j * 8); });
+      chars = { n: order.length, pat: cp, col: cc, name: gname };
+    }
+  }
+  const codec = new PLETTER_LIB.PletterCodec();
+  const zp = await codec.compress(form === 0 ? chars.pat : pat), zc = await codec.compress(form === 0 ? chars.col : col);
+  const names = form === 0 ? chars.name : nam, zn = await codec.compress(names);
+  if (token !== pletterToken) return;
+  const base = srcName.replace(/\.[^.]*$/, '').replace(/[^A-Za-z0-9_-]+/g, '_') || 'image';
+  const lines = ["\t' Generated by the Amy image converter (TMS9918A mode 2, Pletter 0.5c)", "\t' Source image: " + srcName.replace(/[^\x20-\x7e]/g, '_')];
+  if (form === 0) {
+    lines.push('\tMODE 0', '\tSCREEN DISABLE', `\tDEFINE CHAR PLETTER 0,${chars.n},image_char`, `\tDEFINE COLOR PLETTER 0,${chars.n},image_color`, '\tSCREEN image_names', '\tSCREEN ENABLE', '\tWHILE 1: WEND', '',
+      dataLines('image_char', zp), '', dataLines('image_color', zc), '', dataLines('image_names', names));
+  } else {
+    lines.push('\tMODE 1', '\tSCREEN DISABLE', '\tDEFINE VRAM PLETTER $0000,$1800,image_bitmap', '\tDEFINE VRAM PLETTER $2000,$1800,image_color');
+    if (form === 2) lines.push('\tSCREEN image_names');
+    lines.push('\tSCREEN ENABLE', '\tWHILE 1: WEND', '', dataLines('image_bitmap', zp), '', dataLines('image_color', zc));
+    if (form === 2) lines.push('', dataLines('image_names', names));
+  }
+  const bas = lines.join('\n') + '\n';
+  $('cvbSrc').textContent = bas;
+  $('cvbHint').textContent = t('cvbForm' + form) + ' (' + zp.length + ' + ' + zc.length + ' B)';
+  const ul = $('outputs');
+  for (const [n, b] of [[form === 0 ? 'chars_pattern.plet' : 'pattern.plet', zp], [form === 0 ? 'chars_color.plet' : 'color.plet', zc], [form === 0 ? 'chars_name.plet' : 'name.plet', zn], ['cvbasic.bas', new TextEncoder().encode(bas)]]) {
+    const li = document.createElement('li'), c = document.createElement('code'), fname = base + '_' + n;
+    c.textContent = fname + ' (' + b.length + ' B)';
+    const bt = document.createElement('button'); bt.type = 'button'; bt.textContent = t('download'); bt.setAttribute('aria-label', t('download') + ' ' + fname);
+    bt.addEventListener('click', () => offerFile(fname, b));
+    li.append(c, bt); ul.append(li);
+  }
+  document.body.dataset.pletterReady = String(token);
+}
+$('cvbCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('cvbSrc').textContent); $('cvbStatus').textContent = t('copied'); }
+  catch (e) { const rg = document.createRange(); rg.selectNodeContents($('cvbSrc')); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg); }
+});
+
+// ---------------------------------------------------------------- image loading
+async function loadFile(f) {
+  try {
+    const bmp = await createImageBitmap(f, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
+    const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+    const ctx = c.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' }); ctx.drawImage(bmp, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height).data, rgb = new Uint8Array(c.width * c.height * 3);
+    for (let i = 0; i < c.width * c.height; i++) {     // transparent pixels become black
+      const a = d[i * 4 + 3] / 255; rgb[i * 3] = Math.round(d[i * 4] * a); rgb[i * 3 + 1] = Math.round(d[i * 4 + 1] * a); rgb[i * 3 + 2] = Math.round(d[i * 4 + 2] * a);
+    }
+    srcImg = { w: c.width, h: c.height, rgb }; srcName = f.name;
+    $('imgInfo').textContent = t('loaded') + f.name + ' (' + c.width + ' x ' + c.height + ')';
+    run();
+  } catch (e) { $('imgInfo').textContent = t('error') + e.message; }
+}
+$('fileInput').addEventListener('change', (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f); });
+const drop = $('drop');
+drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+
+// ---------------------------------------------------------------- controls
+for (const id of ['pletter', 'normalize', 'fit', 'palette', 'cropX', 'cropY', 'dither', 'strength', 'brightness', 'contrast', 'dedup', 'levels', 'th0', 'th1', 'th2', 'sprites', 'nesMap']) {
+  $(id).addEventListener('input', () => { const o = $(id + 'Out'); if (o) o.textContent = $(id).value; renderOptions(); schedule(); });
+}
+$('zoom').addEventListener('change', () => { if (result) { sizeCanvas($('prevCanvas'), result.preview); sizeCanvas($('origCanvas'), result.preview); } });
+// protected area: drag on the machine preview (NES)
+let drawing = false, start = null;
+$('protectBtn').addEventListener('click', () => { drawing = !drawing; $('protectBtn').setAttribute('aria-pressed', String(drawing)); $('prevCanvas').classList.toggle('drawing', drawing); $('protectBtn').textContent = t(drawing ? 'protectDrawing' : 'protectDraw'); });
+$('protectClear').addEventListener('click', () => { protect = null; renderOptions(); schedule(); });
+const cpos = (e) => { const c = $('prevCanvas'), r = c.getBoundingClientRect(); return [Math.max(0, Math.min(c.width, Math.round((e.clientX - r.left) * c.width / r.width))), Math.max(0, Math.min(c.height, Math.round((e.clientY - r.top) * c.height / r.height)))]; };
+$('prevCanvas').addEventListener('pointerdown', (e) => { if (!drawing || machine !== 'nes') return; start = cpos(e); $('prevCanvas').setPointerCapture(e.pointerId); });
+$('prevCanvas').addEventListener('pointerup', (e) => {
+  if (!start) return; const p = cpos(e);
+  const r = [Math.min(start[0], p[0]), Math.min(start[1], p[1]), Math.max(start[0], p[0]), Math.max(start[1], p[1])];
+  start = null; if (r[2] - r[0] >= 2 && r[3] - r[1] >= 2) { protect = r; drawing = false; $('protectBtn').setAttribute('aria-pressed', 'false'); $('prevCanvas').classList.remove('drawing'); $('protectBtn').textContent = t('protectDraw'); renderOptions(); schedule(); }
+});
+window.setProtect = (r) => { protect = r; renderOptions(); schedule(); };   // used by the test script
+$('langBtn').addEventListener('click', () => { lang = lang === 'fr' ? 'en' : 'fr'; try { localStorage.setItem('amyz-lang', lang); } catch (e) {} applyTexts(); });
+$('themeBtn').addEventListener('click', () => {
+  const r = document.documentElement, cur = r.dataset.theme || 'auto', nx = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+  if (nx === 'auto') delete r.dataset.theme; else r.dataset.theme = nx;
+  try { localStorage.setItem('amyz-theme', nx); } catch (e) {} updateTheme();
+});
+try { const th = localStorage.getItem('amyz-theme'); if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th; } catch (e) {}
+applyTexts();
+</script>
+
+</body></html>

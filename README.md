@@ -121,12 +121,19 @@ decoder source. The later
 [`machine comparison`](benchmarks/machine-comparison.md) documents measured
 results on C64, Z80/TMS9918A systems, TI-99/4A, NES and Game Boy.
 
+The self-contained bilingual
+[`Amy Image Converter`](tools/amyz-image-converter.html) prepares raw image data
+for the packer. It supports TMS9918A Graphics II, C64 hires and multicolor,
+Game Boy 2bpp and NES tiles/attributes, with local previews and downloads. The
+TMS9918A path can also export Pletter data and a ready-to-use CVBasic snippet.
+
 ## Repository layout
 
 - `encoders/`: JavaScript, readable Python reference, and optimized C encoder.
 - `decoders/`: Z80, 6502 and TMS9900 implementations.
 - `tools/amyzpack/`: C64 self-extracting packer and forward/backward depackers.
 - [`tools/amyz-web-packer.html`](tools/amyz-web-packer.html): self-contained bilingual browser packer.
+- [`tools/amyz-image-converter.html`](tools/amyz-image-converter.html): offline multi-platform image converter.
 - `benchmarks/`: measured results and the Graphics II comparison contract.
 - `examples/warrior-platform-ports/`: validated MSX1, SG-1000, NES and Game Boy ports,
   including reproducible builds, ROMs, screenshots and decoder evidence.
