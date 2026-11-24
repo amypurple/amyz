@@ -1,0 +1,1 @@
+ok 2 fail 0, 171.7 cycles per output byte

@@ -120,6 +120,8 @@ See [`SPEC.md`](SPEC.md) for the normative stream definition and
 - `decoders/`: Z80, 6502 and TMS9900 implementations.
 - `tools/amyzpack/`: C64 self-extracting packer and forward/backward depackers.
 - `benchmarks/`: measured results and the Graphics II comparison contract.
+- `examples/warrior-platform-ports/`: validated MSX1, SG-1000 and NES ports,
+  including reproducible builds, ROMs, screenshots and decoder evidence.
 - `tests/`: portable smoke tests and licensed CPU validation harnesses.
 - `SPEC.md`: normative format specification.
 

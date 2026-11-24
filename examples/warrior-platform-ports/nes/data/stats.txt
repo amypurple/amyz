@@ -1,0 +1,4 @@
+palettes [['0x12', '0x16', '0x38'], ['0x2c', '0x30', '0x38'], ['0x6', '0x16', '0x2c'], ['0x28', '0x30', '0x38']]
+pixels recoloured to fit the attribute palettes: 460 of 49152 (46 in the face/hair box (100, 64, 168, 112))
+sprites: 3 (+ sprite 0), sprite palettes [['0x22', '0x2c']], pixels still different from the original after the sprites: 405 (0 in the face/hair box)
+tiles: table 0 175 (incl. 3 sprite tiles), table 1 209

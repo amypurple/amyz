@@ -1,0 +1,4 @@
+amyzf_msx: ok 200 fail 0  T/byte 206.1  smallest data gap 34 T  gaps under 29: 0
+amyz_msx: ok 200 fail 0  T/byte 351.3  smallest data gap 34 T  gaps under 29: 0
+amyzf_sg: ok 200 fail 0  T/byte 206.1  smallest data gap 34 T  gaps under 29: 0
+amyz_sg: ok 200 fail 0  T/byte 351.3  smallest data gap 34 T  gaps under 29: 0

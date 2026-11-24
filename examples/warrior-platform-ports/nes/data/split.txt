@@ -1,0 +1,1 @@
+sprite 0: tile row 13, column 25, hit on picture line 95 at x 206
