@@ -25,6 +25,10 @@ An encoder's search effort also does not change the format. The JavaScript,
 Python and C encoders may find different fitted tables when given different
 search budgets, but compatible decoders consume the resulting streams.
 
+An experimental alternative token format called AMYZ2 was measured and
+rejected. It is not a successor to AMYZ and is not part of the public format or
+packer interface. See [`docs/REJECTED-EXPERIMENTS.md`](docs/REJECTED-EXPERIMENTS.md).
+
 ## Why AMYZ exists
 
 AMYZ continues Amy Bienvenu's DAN1-DAN3 compression experiments. It borrows
