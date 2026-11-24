@@ -4,6 +4,8 @@
 
 - Added validated MSX1, SG-1000 and NES Warrior demonstrations with reproducible
   builds, emulator screenshots and byte-exact decoder harness results.
+- Added native small and fast Game Boy SM83 decoders and a 32 KB Warrior demo,
+  validated byte-exact over 200 corpus files and visually in two emulators.
 - Kept the palette-optimized NES conversion as the sole NES example. It aligns
   the image to the attribute grid and uses a bounded sprite overlay to preserve
   the face and red hair.

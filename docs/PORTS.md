@@ -34,6 +34,14 @@ The supplied timing includes both zero-wait-state estimates and modeled
 TI-99/4A memory wait states. Byte-exact behavior is stronger evidence than the
 cycle model, which still warrants confirmation on hardware or a mature emulator.
 
+## Game Boy SM83
+
+The caller enters with `HL` pointing to the compressed stream and `DE` holding
+the destination address. The destination may be WRAM, or VRAM while the LCD is
+off. The small decoder uses two HRAM bytes and an external 15-byte table; the
+fast decoder uses three HRAM bytes and an expanded 45-byte table. Both return
+the first address after the output in `DE` and do not decode in place.
+
 ## C64 packer
 
 `tools/amyzpack/amyzpack4.mjs` creates a self-extracting PRG. It can select

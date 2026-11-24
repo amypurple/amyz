@@ -1,0 +1,2 @@
+picture 160x120 at map row 1; grey centres [1, 46, 97, 181]
+unique tiles incl. the black border tile: 186 (of 300 picture tiles)

@@ -1,0 +1,4 @@
+small (amyz_gb.asm, 161 B, .tabz):
+ok 200 fail 0  total out 351896 bytes  T 104531436  T/byte 297.0
+fast (amyzf_gb.asm, 204 B, .tabzx):
+ok 200 fail 0  total out 351896 bytes  T 46308368  T/byte 131.5

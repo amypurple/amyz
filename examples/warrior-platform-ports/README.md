@@ -1,4 +1,4 @@
-# AMYZ ports: MSX1, SG-1000 and NES
+# AMYZ ports: MSX1, SG-1000, NES and Game Boy
 
 AMYZ is by Amy (AmyPurple), made with Claude. It borrows ideas from ZX0 by Einar Saukas and
 Exomizer by Magnus Lind.
@@ -121,6 +121,27 @@ byte-exact through `amyz_nes` in the PPU harness (`nes/data/decode_test.txt`).
 The face, the skin and the red hair are back. The remaining differences are elsewhere: the
 flowers lose their magenta, and the shield emblem turns cyan.
 
+## Game Boy (Sharp SM83 / LR35902)
+
+`gb/amyz_gb.asm` and `gb/amyzf_gb.asm` are native SM83 decoders rather than
+Z80 translations. They use `ld a,[hl+]`, keep their small state in HRAM and
+decode to WRAM or to VRAM while the LCD is off.
+
+| decoder | code | table | measured corpus speed |
+|---|---:|---:|---:|
+| small | 161 B | 15 B | 297.0 T-states/output byte |
+| fast | 204 B | 45 B | 131.5 T-states/output byte |
+
+Both pass all **200/200** corpus files byte-exact. The fast decoder is 2.26
+times as fast for 73 additional bytes including its expanded table.
+
+The 32 KB `gb/warrior_gb.gb` demonstration converts the full Warrior picture
+to four greys, merges its 300 source tiles into 186 unique tiles, and decodes
+the tile and map data into VRAM with the LCD disabled. Gambatte and SameBoy
+produce the same pixels as `gb/data/preview.png`; the valid Nintendo logo and
+header checksum also pass SameBoy's DMG boot ROM. See `gb/README.md` for the
+calling convention, build instructions, measurements and limitations.
+
 ## What could not be tested
 
 - **Real hardware:** not tested on any of the three machines.
@@ -144,6 +165,7 @@ flowers lose their magenta, and the shield emblem turns cyan.
 | `z80/` | port-parameterised decoders, test wrappers and binaries, `vtest_port.c`, `run_port.sh`, `corpus_test.txt` |
 | `warrior/` | MSX and SG-1000 demo source (`warrior_z80.asm`), the two ROMs, the Warrior streams and tables |
 | `nes/` | `amyz_nes.s`, `runnes.c` and `cpu6502io.h` (harness), `corpus_test.txt`, `nes_convert.py`, the packer script, `warrior_nes.s`, `nes.cfg`, `build_nes.sh`, `data/`, `warrior.nes`, `orig.png` |
+| `gb/` | small and fast SM83 decoders, CPU harness, converter, build scripts, two demo ROMs, packed data and Gambatte/SameBoy screenshots |
 | `lib/` | the AMYZ JS codec |
 | `retroshot.c` | the headless libretro frontend (CC0); build with `gcc -I<libretro-common>/include -o retroshot retroshot.c -ldl` |
 | `shot_*.png` | emulator screenshots |
