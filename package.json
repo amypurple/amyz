@@ -5,7 +5,7 @@
   "description": "Reference tools and tests for the AMYZ 8-bit compression format",
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.mjs"
+    "test": "node tests/smoke.mjs && node tests/web-packer-smoke.mjs"
   },
   "license": "BSD-3-Clause"
 }

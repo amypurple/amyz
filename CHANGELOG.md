@@ -9,6 +9,9 @@
 - Kept the palette-optimized NES conversion as the sole NES example. It aligns
   the image to the attribute grid and uses a bounded sprite overlay to preserve
   the face and red hair.
+- Added a self-contained bilingual Web packer with downloadable streams,
+  tables and matching decoder sources.
+- Added a measured machine-by-machine comparison and emulator contact sheet.
 
 ## 1.0.0 - 2026-11-23
 
