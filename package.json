@@ -1,0 +1,12 @@
+{
+  "name": "amyz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reference tools and tests for the AMYZ 8-bit compression format",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke.mjs"
+  },
+  "license": "BSD-3-Clause"
+}
+

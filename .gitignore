@@ -1,0 +1,12 @@
+*.exe
+*.o
+*.obj
+*.prg
+*.rom
+*.bin
+out/
+build/
+node_modules/
+__pycache__/
+*.pyc
+

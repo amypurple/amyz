@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  portable-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: JavaScript reference tests
+        run: npm test
+      - name: Python reference tests
+        run: python tests/smoke.py
+      - name: Build C encoder
+        run: gcc -O3 -o /tmp/amyzenc encoders/c/amyzenc.c encoders/c/amyzc_core.c -lm
+      - name: Check C encoder starts
+        run: /tmp/amyzenc || test $? -eq 1
+
