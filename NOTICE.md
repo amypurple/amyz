@@ -22,3 +22,10 @@ contains measurements and manifests, not those raw images, unless their
 redistribution rights are known. Each external tool used for comparison remains
 under its own license.
 
+The test harness includes:
+
+- Nicolas Allemand's `superzazu/z80` core under the MIT License; its license is
+  retained at `tests/harness/z80/LICENSE`.
+- Purpose-built minimal 6502 and TMS9900 test cores released as public domain / 
+  CC0 in their source headers.
+

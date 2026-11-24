@@ -116,7 +116,7 @@ See [`SPEC.md`](SPEC.md) for the normative stream definition and
 - `decoders/`: Z80, 6502 and TMS9900 implementations.
 - `tools/amyzpack/`: C64 self-extracting packer and forward/backward depackers.
 - `benchmarks/`: measured results and the Graphics II comparison contract.
-- `tests/`: portable smoke tests and format vectors.
+- `tests/`: portable smoke tests and licensed CPU validation harnesses.
 - `SPEC.md`: normative format specification.
 
 ## Validation

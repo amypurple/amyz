@@ -15,6 +15,11 @@ The AMYZ 1.0 release evidence covered:
 - C and JavaScript identity for fixed tables and selected search profiles;
 - direct-to-VRAM access spacing of at least 29 T-states on the Z80 routines.
 
+The harness sources are retained under `tests/harness`. Speed-model fitting
+inputs, scripts and curves are retained under `benchmarks/speed`, allowing the
+size-versus-speed parser cost model to be inspected rather than treated as an
+opaque claim.
+
 The 42-picture Graphics II corpus is a separate public comparison contract. A
 picture contains exactly 6,144 pattern bytes and 6,144 color bytes. Its existing
 results are retained in `benchmarks/graphics-ii`; raw third-party artwork is not
